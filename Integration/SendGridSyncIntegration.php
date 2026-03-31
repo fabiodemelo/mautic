@@ -10,8 +10,9 @@ use Mautic\IntegrationsBundle\Integration\DefaultConfigFormTrait;
 use Mautic\IntegrationsBundle\Integration\Interfaces\BasicInterface;
 use Mautic\IntegrationsBundle\Integration\Interfaces\ConfigFormAuthInterface;
 use Mautic\IntegrationsBundle\Integration\Interfaces\ConfigFormFeaturesInterface;
+use Mautic\IntegrationsBundle\Integration\Interfaces\ConfigFormInterface;
 
-class SendGridSyncIntegration extends BasicIntegration implements BasicInterface, ConfigFormAuthInterface, ConfigFormFeaturesInterface
+class SendGridSyncIntegration extends BasicIntegration implements BasicInterface, ConfigFormInterface, ConfigFormAuthInterface, ConfigFormFeaturesInterface
 {
     use ConfigurationTrait;
     use DefaultConfigFormTrait;
