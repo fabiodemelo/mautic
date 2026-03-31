@@ -1,0 +1,26 @@
+{
+    "name": "mauticplugin/sendgridsync-bundle",
+    "description": "Sync SendGrid suppressions (bounces, spam reports, blocks, invalid emails, unsubscribes) to Mautic DNC or segments.",
+    "type": "mautic-plugin",
+    "version": "1.0.0",
+    "keywords": ["mautic", "sendgrid", "suppression", "dnc", "bounce", "email"],
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Fabio de Melo",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "mautic/core-lib": ">=5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MauticPlugin\\MauticSendGridSyncBundle\\": ""
+        }
+    },
+    "extra": {
+        "install-directory-name": "MauticSendGridSyncBundle"
+    }
+}
