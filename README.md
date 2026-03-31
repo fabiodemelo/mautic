@@ -41,31 +41,22 @@ Protect your sender reputation by ensuring Mautic never sends to addresses that 
    git clone https://github.com/fabiodemelo/mautic.git MauticSendGridSyncBundle
    ```
 
-2. **Clear the Mautic cache** (you should be inside the plugins folder after step 1):
+2. **Clear the Mautic cache and install the plugin:**
 
    ```bash
-   # Check your current path
-   pwd
-   # You should see: /path/to/mautic/plugins
-
-   # Go back to the Mautic root directory
-   cd ..
-
-   # Clear the cache
+   cd /path/to/mautic/
    php bin/console cache:clear
-   ```
-
-3. **Install the plugin** (run migrations and register):
-
-   ```bash
    php bin/console mautic:plugins:reload
    ```
 
-4. **Verify** the plugin appears in **Settings > Plugins > SendGrid Suppression Sync**.
+   > **Important:** Always run `cache:clear` and `mautic:plugins:reload` from the **Mautic root directory** (where `bin/console` lives), not from inside the plugins folder.
+
+3. **Verify** the plugin appears in **Settings > Plugins > SendGrid Suppression Sync**.
 
 ### Option 2: Composer (when published to Packagist)
 
 ```bash
+cd /path/to/mautic/
 composer require mauticplugin/sendgridsync-bundle
 php bin/console cache:clear
 php bin/console mautic:plugins:reload
@@ -247,15 +238,27 @@ The plugin processes in batches of 100 and clears Doctrine's identity map betwee
 
 ---
 
+## Updating
+
+To update the plugin to the latest version:
+
+```bash
+cd /path/to/mautic/plugins/MauticSendGridSyncBundle/
+git pull
+cd /path/to/mautic/
+php bin/console cache:clear
+php bin/console mautic:plugins:reload
+```
+
+---
+
 ## Uninstallation
 
 1. Disable the plugin in **Settings > Plugins**
-2. Remove the plugin directory:
+2. Remove the plugin directory and clear cache:
    ```bash
+   cd /path/to/mautic/
    rm -rf plugins/MauticSendGridSyncBundle/
-   ```
-3. Clear the cache:
-   ```bash
    php bin/console cache:clear
    ```
 4. The database tables (`plugin_sendgrid_sync_log`, `plugin_sendgrid_suppressions`) will remain. To remove them manually:
