@@ -34,7 +34,7 @@ class SendGridSyncIntegration extends BasicIntegration implements BasicInterface
         return 'plugins/MauticSendGridSyncBundle/Assets/img/sendgrid.png';
     }
 
-    public function getConfigFormName(): ?string
+    public function getAuthConfigFormName(): string
     {
         return \MauticPlugin\MauticSendGridSyncBundle\Form\Type\ConfigAuthType::class;
     }
