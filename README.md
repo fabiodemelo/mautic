@@ -50,10 +50,17 @@ Protect your sender reputation by ensuring Mautic never sends to addresses that 
    rm -rf /tmp/mautic-sgssync
    ```
 
-2. **Clear the Mautic cache**:
+2. **Clear the Mautic cache** (you should be inside the plugins folder after step 1):
 
    ```bash
-   cd /path/to/mautic/
+   # Check your current path
+   pwd
+   # You should see: /path/to/mautic/plugins
+
+   # Go back to the Mautic root directory
+   cd ..
+
+   # Clear the cache
    php bin/console cache:clear
    ```
 
