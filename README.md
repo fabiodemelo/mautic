@@ -34,11 +34,20 @@ Protect your sender reputation by ensuring Mautic never sends to addresses that 
 
 ### Option 1: Manual Installation
 
-1. **Download** or clone this repository:
+1. **Download** or clone this repository into your Mautic plugins directory:
 
    ```bash
    cd /path/to/mautic/plugins/
-   git clone https://github.com/yourusername/MauticSendGridSyncBundle.git
+   git clone https://github.com/fabiodemelo/mautic.git MauticSendGridSyncBundle
+   ```
+
+   Or download and extract only the plugin folder:
+
+   ```bash
+   cd /path/to/mautic/plugins/
+   git clone https://github.com/fabiodemelo/mautic.git --depth 1 /tmp/mautic-sgssync
+   cp -r /tmp/mautic-sgssync/plugins/MauticSendGridSyncBundle ./
+   rm -rf /tmp/mautic-sgssync
    ```
 
 2. **Clear the Mautic cache**:
