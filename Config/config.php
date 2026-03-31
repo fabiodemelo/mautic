@@ -91,11 +91,8 @@ return [
                 'tags'  => [
                     'mautic.integration',
                     'mautic.basic_integration',
+                    'mautic.config_integration',
                 ],
-            ],
-            'mautic.integration.sendgridsync.configuration' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Integration\SendGridSyncConfiguration::class,
-                'tags'      => ['mautic.config_integration'],
             ],
         ],
         'others' => [
