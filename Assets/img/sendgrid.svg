@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4e5d9d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A82E2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="arrow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="8" y="8" width="240" height="240" rx="48" ry="48" fill="url(#bg)" />
+
+  <!-- Shield shape (protection concept) -->
+  <path d="M128 40 L188 65 L188 130 Q188 175 128 210 Q68 175 68 130 L68 65 Z"
+        fill="none" stroke="white" stroke-width="6" opacity="0.25"/>
+
+  <!-- Mautic "M" stylized - left side -->
+  <g transform="translate(60, 75)">
+    <!-- M shape -->
+    <path d="M0 70 L0 10 L20 10 L35 40 L50 10 L70 10 L70 70"
+          fill="none" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+  </g>
+
+  <!-- Sync arrows in the middle -->
+  <g transform="translate(128, 128)">
+    <!-- Top arrow (right-pointing) -->
+    <path d="M-12,-45 L12,-45" stroke="url(#arrow)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M6,-51 L14,-45 L6,-39" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Bottom arrow (left-pointing) -->
+    <path d="M12,45 L-12,45" stroke="url(#arrow)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M-6,39 L-14,45 L-6,51" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- SendGrid "SG" stylized - right side -->
+  <g transform="translate(140, 80)">
+    <!-- S shape -->
+    <path d="M35 5 Q15 0 10 15 Q5 30 25 35 Q45 40 40 55 Q35 70 15 65"
+          fill="none" stroke="white" stroke-width="7" stroke-linecap="round" opacity="0.95"/>
+  </g>
+
+  <!-- Small email envelope at bottom center -->
+  <g transform="translate(104, 170)">
+    <rect x="0" y="0" width="48" height="32" rx="4" ry="4" fill="none" stroke="white" stroke-width="4" opacity="0.7"/>
+    <path d="M2 2 L24 18 L46 2" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  </g>
+</svg>
