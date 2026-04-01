@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Command;
+namespace MauticPlugin\MauticSyncDataBundle\Command;
 
 use Mautic\IntegrationsBundle\Helper\IntegrationsHelper;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SyncLog;
-use MauticPlugin\MauticSendGridSyncBundle\Integration\SendGridSyncIntegration;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SendGridApiClient;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SyncEngine;
+use MauticPlugin\MauticSyncDataBundle\Entity\SyncLog;
+use MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration;
+use MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient;
+use MauticPlugin\MauticSyncDataBundle\Service\SyncEngine;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class SyncCommand extends Command
 {
-    protected static $defaultName = 'mautic:sendgrid:sync';
+    protected static $defaultName = 'mautic:syncdata:sync';
 
     public function __construct(
         private readonly SyncEngine $syncEngine,
@@ -40,7 +40,7 @@ class SyncCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         try {
-            $integration = $this->integrationsHelper->getIntegration(SendGridSyncIntegration::NAME);
+            $integration = $this->integrationsHelper->getIntegration(SyncDataIntegration::NAME);
         } catch (\Throwable $e) {
             $io->error('SendGrid Sync integration is not configured or not enabled.');
 

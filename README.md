@@ -1,4 +1,4 @@
-# MauticSendGridSync Plugin
+# MauticSyncData Plugin
 
 **Sync SendGrid suppressions (bounces, spam reports, blocks, invalid emails, unsubscribes) to Mautic's Do Not Contact list or segments — automatically.**
 
@@ -38,7 +38,7 @@ Protect your sender reputation by ensuring Mautic never sends to addresses that 
 
    ```bash
    cd /path/to/mautic/plugins/
-   git clone https://github.com/fabiodemelo/mautic.git MauticSendGridSyncBundle
+   git clone https://github.com/fabiodemelo/mautic.git MauticSyncDataBundle
    ```
 
 2. **Clear the Mautic cache and install the plugin:**
@@ -57,7 +57,7 @@ Protect your sender reputation by ensuring Mautic never sends to addresses that 
 
 ```bash
 cd /path/to/mautic/
-composer require mauticplugin/sendgridsync-bundle
+composer require mauticplugin/syncdata-bundle
 php bin/console cache:clear
 php bin/console mautic:plugins:reload
 ```
@@ -109,10 +109,10 @@ Add this to your server's crontab:
 
 ```bash
 # Run every 15 minutes (match your configured interval)
-*/15 * * * * php /path/to/mautic/bin/console mautic:sendgrid:sync --type=incremental
+*/15 * * * * php /path/to/mautic/bin/console mautic:syncdata:sync --type=incremental
 
 # Or for a full re-sync (e.g., once per week)
-0 2 * * 0 php /path/to/mautic/bin/console mautic:sendgrid:sync --type=full
+0 2 * * 0 php /path/to/mautic/bin/console mautic:syncdata:sync --type=full
 ```
 
 ---
@@ -141,19 +141,19 @@ Click **Export CSV** on the dashboard to download all suppressions (respects act
 
 ```bash
 # Incremental sync (default — only new since last sync)
-php bin/console mautic:sendgrid:sync
+php bin/console mautic:syncdata:sync
 
 # Full sync (re-sync everything within configured range)
-php bin/console mautic:sendgrid:sync --type=full
+php bin/console mautic:syncdata:sync --type=full
 
 # Sync only bounces
-php bin/console mautic:sendgrid:sync --suppression=bounce
+php bin/console mautic:syncdata:sync --suppression=bounce
 
 # Dry run (preview without changes)
-php bin/console mautic:sendgrid:sync --dry-run
+php bin/console mautic:syncdata:sync --dry-run
 
 # Combine options
-php bin/console mautic:sendgrid:sync --type=full --suppression=spam_report --dry-run
+php bin/console mautic:syncdata:sync --type=full --suppression=spam_report --dry-run
 ```
 
 **Suppression type values for `--suppression`:**
@@ -167,8 +167,8 @@ The plugin creates two tables:
 
 | Table | Purpose |
 |-------|---------|
-| `plugin_sendgrid_sync_log` | Sync run history (timestamp, status, counts, errors) |
-| `plugin_sendgrid_suppressions` | Cache of all synced suppressions (email, type, reason, action taken) |
+| `plugin_syncdata_log` | Sync run history (timestamp, status, counts, errors) |
+| `plugin_syncdata_suppressions` | Cache of all synced suppressions (email, type, reason, action taken) |
 
 Tables are created automatically via Doctrine migrations when the plugin is installed.
 
@@ -180,8 +180,8 @@ The plugin uses Mautic's role-based permission system:
 
 | Permission | Access |
 |-----------|--------|
-| `sendgridsync:dashboard:view` | View the dashboard (read-only) |
-| `sendgridsync:settings:manage` | Change settings, trigger manual sync, export data |
+| `syncdata:dashboard:view` | View the dashboard (read-only) |
+| `syncdata:settings:manage` | Change settings, trigger manual sync, export data |
 
 Configure in **Settings > Roles**.
 
@@ -190,9 +190,9 @@ Configure in **Settings > Roles**.
 ## Architecture
 
 ```
-plugins/MauticSendGridSyncBundle/
+plugins/MauticSyncDataBundle/
 ├── Assets/css/js/              # Dashboard styles and Chart.js interactions
-├── Command/                    # mautic:sendgrid:sync console command
+├── Command/                    # mautic:syncdata:sync console command
 ├── Config/config.php           # Routes, services, menu registration
 ├── Controller/                 # Dashboard, Settings, Sync controllers
 ├── Entity/                     # SyncLog + Suppression entities & repositories
@@ -231,7 +231,7 @@ Your API key doesn't have the required permissions. Create a new key with **Supp
 ### Sync runs but finds 0 records
 - Check your **Initial Sync Range** — if set to 7 days and no suppressions occurred in the last 7 days, nothing will sync
 - Verify the suppression types are **enabled** in Settings
-- Try a **full sync**: `php bin/console mautic:sendgrid:sync --type=full`
+- Try a **full sync**: `php bin/console mautic:syncdata:sync --type=full`
 
 ### High memory usage during sync
 The plugin processes in batches of 100 and clears Doctrine's identity map between batches. If you have >100k suppressions, consider running the initial full sync during off-peak hours.
@@ -243,7 +243,7 @@ The plugin processes in batches of 100 and clears Doctrine's identity map betwee
 To update the plugin to the latest version:
 
 ```bash
-cd /path/to/mautic/plugins/MauticSendGridSyncBundle/
+cd /path/to/mautic/plugins/MauticSyncDataBundle/
 git pull
 cd /path/to/mautic/
 php bin/console cache:clear
@@ -258,13 +258,13 @@ php bin/console mautic:plugins:reload
 2. Remove the plugin directory and clear cache:
    ```bash
    cd /path/to/mautic/
-   rm -rf plugins/MauticSendGridSyncBundle/
+   rm -rf plugins/MauticSyncDataBundle/
    php bin/console cache:clear
    ```
-4. The database tables (`plugin_sendgrid_sync_log`, `plugin_sendgrid_suppressions`) will remain. To remove them manually:
+4. The database tables (`plugin_syncdata_log`, `plugin_syncdata_suppressions`) will remain. To remove them manually:
    ```sql
-   DROP TABLE IF EXISTS plugin_sendgrid_suppressions;
-   DROP TABLE IF EXISTS plugin_sendgrid_sync_log;
+   DROP TABLE IF EXISTS plugin_syncdata_suppressions;
+   DROP TABLE IF EXISTS plugin_syncdata_log;
    ```
 
 ---

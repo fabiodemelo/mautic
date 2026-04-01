@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Migrations;
+namespace MauticPlugin\MauticSyncDataBundle\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
@@ -11,16 +11,16 @@ final class Version20260330001 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Create plugin_sendgrid_sync_log table';
+        return 'Create plugin_syncdata_log table';
     }
 
     public function up(Schema $schema): void
     {
-        if ($schema->hasTable('plugin_sendgrid_sync_log')) {
+        if ($schema->hasTable('plugin_syncdata_log')) {
             return;
         }
 
-        $table = $schema->createTable('plugin_sendgrid_sync_log');
+        $table = $schema->createTable('plugin_syncdata_log');
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
         $table->addColumn('sync_type', 'string', ['length' => 20]);
         $table->addColumn('started_at', 'datetime');
@@ -35,12 +35,12 @@ final class Version20260330001 extends AbstractMigration
         $table->addColumn('created_at', 'datetime');
 
         $table->setPrimaryKey(['id']);
-        $table->addIndex(['status'], 'idx_sgsl_status');
-        $table->addIndex(['started_at'], 'idx_sgsl_started_at');
+        $table->addIndex(['status'], 'idx_sd_status');
+        $table->addIndex(['started_at'], 'idx_sd_started_at');
     }
 
     public function down(Schema $schema): void
     {
-        $schema->dropTable('plugin_sendgrid_sync_log');
+        $schema->dropTable('plugin_syncdata_log');
     }
 }

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Entity;
+namespace MauticPlugin\MauticSyncDataBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SyncLogRepository::class)]
-#[ORM\Table(name: 'plugin_sendgrid_sync_log')]
-#[ORM\Index(columns: ['status'], name: 'idx_sgsl_status')]
-#[ORM\Index(columns: ['started_at'], name: 'idx_sgsl_started_at')]
+#[ORM\Table(name: 'plugin_syncdata_log')]
+#[ORM\Index(columns: ['status'], name: 'idx_sd_status')]
+#[ORM\Index(columns: ['started_at'], name: 'idx_sd_started_at')]
 class SyncLog
 {
     public const STATUS_RUNNING = 'running';

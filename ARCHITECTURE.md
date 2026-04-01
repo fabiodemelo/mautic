@@ -1,11 +1,11 @@
-# MauticSendGridSync — Technical Architecture Plan
+# MauticSyncData — Technical Architecture Plan
 
 ## 1. Architecture Overview
 
 A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC system (or designated segments), with a dashboard for analytics and a cron command for automated sync.
 
-**Namespace:** `MauticPlugin\MauticSendGridSyncBundle`
-**Directory:** `plugins/MauticSendGridSyncBundle/`
+**Namespace:** `MauticPlugin\MauticSyncDataBundle`
+**Directory:** `plugins/MauticSyncDataBundle/`
 **Compatibility:** Mautic >=5.0, PHP >=8.1, Symfony 6.x
 
 ---
@@ -30,7 +30,7 @@ A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC 
 
 ### 3.1 Entity: `SyncLog`
 
-**Table:** `plugin_sendgrid_sync_log`
+**Table:** `plugin_syncdata_log`
 **Purpose:** Record of each sync run for history and audit.
 
 | Column | Type | Nullable | Description |
@@ -56,7 +56,7 @@ A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC 
 
 ### 3.2 Entity: `Suppression`
 
-**Table:** `plugin_sendgrid_suppressions`
+**Table:** `plugin_syncdata_suppressions`
 **Purpose:** Cache of every synced suppression for dashboard queries and deduplication.
 
 | Column | Type | Nullable | Description |
@@ -107,37 +107,37 @@ All routes require authentication (Mautic admin session).
 
 | Method | Route | Controller | Permission | Description |
 |--------|-------|------------|------------|-------------|
-| GET | `/s/plugins/sendgridsync/dashboard` | `DashboardController::indexAction` | `sendgridsync:view` | Main dashboard page |
-| GET | `/s/plugins/sendgridsync/dashboard/stats` | `DashboardController::statsAction` | `sendgridsync:view` | AJAX: summary card data |
-| GET | `/s/plugins/sendgridsync/dashboard/chart/{type}` | `DashboardController::chartDataAction` | `sendgridsync:view` | AJAX: chart data (breakdown/trend) |
-| GET | `/s/plugins/sendgridsync/dashboard/suppressions` | `DashboardController::suppressionsAction` | `sendgridsync:view` | AJAX: paginated suppressions table |
-| GET | `/s/plugins/sendgridsync/dashboard/history` | `DashboardController::historyAction` | `sendgridsync:view` | AJAX: sync history log |
-| GET | `/s/plugins/sendgridsync/dashboard/export` | `DashboardController::exportAction` | `sendgridsync:manage` | CSV export of suppressions |
+| GET | `/s/plugins/syncdata/dashboard` | `DashboardController::indexAction` | `syncdata:view` | Main dashboard page |
+| GET | `/s/plugins/syncdata/dashboard/stats` | `DashboardController::statsAction` | `syncdata:view` | AJAX: summary card data |
+| GET | `/s/plugins/syncdata/dashboard/chart/{type}` | `DashboardController::chartDataAction` | `syncdata:view` | AJAX: chart data (breakdown/trend) |
+| GET | `/s/plugins/syncdata/dashboard/suppressions` | `DashboardController::suppressionsAction` | `syncdata:view` | AJAX: paginated suppressions table |
+| GET | `/s/plugins/syncdata/dashboard/history` | `DashboardController::historyAction` | `syncdata:view` | AJAX: sync history log |
+| GET | `/s/plugins/syncdata/dashboard/export` | `DashboardController::exportAction` | `syncdata:manage` | CSV export of suppressions |
 
 ### 4.2 Sync
 
 | Method | Route | Controller | Permission | Description |
 |--------|-------|------------|------------|-------------|
-| POST | `/s/plugins/sendgridsync/sync/run` | `SyncController::runAction` | `sendgridsync:manage` | Trigger manual sync (AJAX) |
-| GET | `/s/plugins/sendgridsync/sync/status/{logId}` | `SyncController::statusAction` | `sendgridsync:view` | Check sync progress (AJAX) |
+| POST | `/s/plugins/syncdata/sync/run` | `SyncController::runAction` | `syncdata:manage` | Trigger manual sync (AJAX) |
+| GET | `/s/plugins/syncdata/sync/status/{logId}` | `SyncController::statusAction` | `syncdata:view` | Check sync progress (AJAX) |
 
 ### 4.3 Settings
 
 | Method | Route | Controller | Permission | Description |
 |--------|-------|------------|------------|-------------|
-| GET | `/s/plugins/sendgridsync/settings` | `SettingsController::indexAction` | `sendgridsync:manage` | Settings page |
-| POST | `/s/plugins/sendgridsync/settings/save` | `SettingsController::saveAction` | `sendgridsync:manage` | Save settings |
-| POST | `/s/plugins/sendgridsync/settings/test` | `SettingsController::testConnectionAction` | `sendgridsync:manage` | Test SendGrid API connection (AJAX) |
+| GET | `/s/plugins/syncdata/settings` | `SettingsController::indexAction` | `syncdata:manage` | Settings page |
+| POST | `/s/plugins/syncdata/settings/save` | `SettingsController::saveAction` | `syncdata:manage` | Save settings |
+| POST | `/s/plugins/syncdata/settings/test` | `SettingsController::testConnectionAction` | `syncdata:manage` | Test SendGrid API connection (AJAX) |
 
 ---
 
 ## 5. Console Command
 
-### `mautic:sendgrid:sync`
+### `mautic:syncdata:sync`
 
 ```
 Usage:
-  mautic:sendgrid:sync [options]
+  mautic:syncdata:sync [options]
 
 Options:
   --type=TYPE           Sync type: incremental (default), full
@@ -149,7 +149,7 @@ Options:
 **Cron setup:**
 ```bash
 # Recommended: run every 15 minutes
-*/15 * * * * php /path/to/mautic/bin/console mautic:sendgrid:sync --type=incremental
+*/15 * * * * php /path/to/mautic/bin/console mautic:syncdata:sync --type=incremental
 ```
 
 ---
@@ -375,16 +375,16 @@ class NotificationService
 ## 7. Integration Class
 
 ```php
-class SendGridSyncIntegration extends AbstractIntegration
+class SyncDataIntegration extends AbstractIntegration
 {
-    const NAME = 'SendGridSync';
+    const NAME = 'SyncData';
 
-    public function getName(): string;           // 'SendGridSync'
+    public function getName(): string;           // 'SyncData'
     public function getDisplayName(): string;     // 'SendGrid Suppression Sync'
     public function getIcon(): string;            // path to icon
 
     public function getRequiredKeyFields(): array;
-    // ['api_key' => 'mautic.sendgridsync.config.api_key']
+    // ['api_key' => 'mautic.syncdata.config.api_key']
 
     public function getAuthenticationType(): string;
     // 'api_key'
@@ -396,13 +396,13 @@ class SendGridSyncIntegration extends AbstractIntegration
 ## 8. Permissions
 
 ```php
-class SendGridSyncPermissions extends AbstractPermissions
+class SyncDataPermissions extends AbstractPermissions
 {
     // Defines three permission levels:
 
-    // sendgridsync:view   — View dashboard (read-only)
-    // sendgridsync:manage — Manual sync, export, settings
-    // sendgridsync:admin  — Full access (includes view + manage)
+    // syncdata:view   — View dashboard (read-only)
+    // syncdata:manage — Manual sync, export, settings
+    // syncdata:admin  — Full access (includes view + manage)
 }
 ```
 
@@ -410,7 +410,7 @@ class SendGridSyncPermissions extends AbstractPermissions
 
 ## 9. Screen Inventory
 
-### 9.1 Dashboard Page (`/s/plugins/sendgridsync/dashboard`)
+### 9.1 Dashboard Page (`/s/plugins/syncdata/dashboard`)
 
 | Section | UI Elements | Data Source |
 |---------|------------|-------------|
@@ -423,7 +423,7 @@ class SendGridSyncPermissions extends AbstractPermissions
 
 **Layout:** Extends Mautic admin layout. Cards in top row (4 columns). Charts side-by-side (50/50). Tables full-width below.
 
-### 9.2 Settings Page (`/s/plugins/sendgridsync/settings`)
+### 9.2 Settings Page (`/s/plugins/syncdata/settings`)
 
 | Section | UI Elements |
 |---------|------------|
@@ -449,13 +449,13 @@ Mautic Admin Sidebar
 ## 10. File Structure
 
 ```
-plugins/MauticSendGridSyncBundle/
-├── MauticSendGridSyncBundle.php              # Bundle class
+plugins/MauticSyncDataBundle/
+├── MauticSyncDataBundle.php              # Bundle class
 ├── composer.json                              # Package metadata
 │
 ├── Assets/
 │   ├── css/
-│   │   └── sendgridsync.css                  # Plugin-specific styles
+│   │   └── syncdata.css                  # Plugin-specific styles
 │   └── js/
 │       └── dashboard.js                       # Chart rendering & AJAX interactions
 │
@@ -463,7 +463,7 @@ plugins/MauticSendGridSyncBundle/
 │   └── config.php                             # Routes, services, menu, permissions
 │
 ├── Command/
-│   └── SyncCommand.php                        # mautic:sendgrid:sync console command
+│   └── SyncCommand.php                        # mautic:syncdata:sync console command
 │
 ├── Controller/
 │   ├── DashboardController.php               # Dashboard page + AJAX endpoints
@@ -477,11 +477,11 @@ plugins/MauticSendGridSyncBundle/
 │   └── SuppressionRepository.php             # Suppression queries (stats, filters)
 │
 ├── Integration/
-│   └── SendGridSyncIntegration.php           # IntegrationsBundle integration class
+│   └── SyncDataIntegration.php           # IntegrationsBundle integration class
 │
 ├── Security/
 │   └── Permissions/
-│       └── SendGridSyncPermissions.php       # view, manage, admin permissions
+│       └── SyncDataPermissions.php       # view, manage, admin permissions
 │
 ├── Service/
 │   ├── SendGridApiClient.php                 # HTTP client for SendGrid v3 API
@@ -493,8 +493,8 @@ plugins/MauticSendGridSyncBundle/
 │   └── NotificationService.php              # Email alerts
 │
 ├── Migrations/
-│   ├── Version20260330001.php                # Create plugin_sendgrid_sync_log
-│   └── Version20260330002.php                # Create plugin_sendgrid_suppressions
+│   ├── Version20260330001.php                # Create plugin_syncdata_log
+│   └── Version20260330002.php                # Create plugin_syncdata_suppressions
 │
 ├── Translations/
 │   └── en_US/
@@ -532,51 +532,51 @@ return [
 
     'routes' => [
         'main' => [
-            'mautic_sendgridsync_dashboard' => [
-                'path'       => '/plugins/sendgridsync/dashboard',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::indexAction',
+            'mautic_syncdata_dashboard' => [
+                'path'       => '/plugins/syncdata/dashboard',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::indexAction',
             ],
-            'mautic_sendgridsync_dashboard_stats' => [
-                'path'       => '/plugins/sendgridsync/dashboard/stats',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::statsAction',
+            'mautic_syncdata_dashboard_stats' => [
+                'path'       => '/plugins/syncdata/dashboard/stats',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::statsAction',
             ],
-            'mautic_sendgridsync_dashboard_chart' => [
-                'path'       => '/plugins/sendgridsync/dashboard/chart/{type}',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::chartDataAction',
+            'mautic_syncdata_dashboard_chart' => [
+                'path'       => '/plugins/syncdata/dashboard/chart/{type}',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::chartDataAction',
             ],
-            'mautic_sendgridsync_dashboard_suppressions' => [
-                'path'       => '/plugins/sendgridsync/dashboard/suppressions',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::suppressionsAction',
+            'mautic_syncdata_dashboard_suppressions' => [
+                'path'       => '/plugins/syncdata/dashboard/suppressions',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::suppressionsAction',
             ],
-            'mautic_sendgridsync_dashboard_history' => [
-                'path'       => '/plugins/sendgridsync/dashboard/history',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::historyAction',
+            'mautic_syncdata_dashboard_history' => [
+                'path'       => '/plugins/syncdata/dashboard/history',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::historyAction',
             ],
-            'mautic_sendgridsync_dashboard_export' => [
-                'path'       => '/plugins/sendgridsync/dashboard/export',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::exportAction',
+            'mautic_syncdata_dashboard_export' => [
+                'path'       => '/plugins/syncdata/dashboard/export',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::exportAction',
             ],
-            'mautic_sendgridsync_sync_run' => [
-                'path'       => '/plugins/sendgridsync/sync/run',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SyncController::runAction',
+            'mautic_syncdata_sync_run' => [
+                'path'       => '/plugins/syncdata/sync/run',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SyncController::runAction',
                 'method'     => 'POST',
             ],
-            'mautic_sendgridsync_sync_status' => [
-                'path'       => '/plugins/sendgridsync/sync/status/{logId}',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SyncController::statusAction',
+            'mautic_syncdata_sync_status' => [
+                'path'       => '/plugins/syncdata/sync/status/{logId}',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SyncController::statusAction',
             ],
-            'mautic_sendgridsync_settings' => [
-                'path'       => '/plugins/sendgridsync/settings',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SettingsController::indexAction',
+            'mautic_syncdata_settings' => [
+                'path'       => '/plugins/syncdata/settings',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SettingsController::indexAction',
             ],
-            'mautic_sendgridsync_settings_save' => [
-                'path'       => '/plugins/sendgridsync/settings/save',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SettingsController::saveAction',
+            'mautic_syncdata_settings_save' => [
+                'path'       => '/plugins/syncdata/settings/save',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SettingsController::saveAction',
                 'method'     => 'POST',
             ],
-            'mautic_sendgridsync_settings_test' => [
-                'path'       => '/plugins/sendgridsync/settings/test',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SettingsController::testConnectionAction',
+            'mautic_syncdata_settings_test' => [
+                'path'       => '/plugins/syncdata/settings/test',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SettingsController::testConnectionAction',
                 'method'     => 'POST',
             ],
         ],
@@ -584,17 +584,17 @@ return [
 
     'menu' => [
         'main' => [
-            'mautic.sendgridsync.menu.root' => [
-                'id'        => 'mautic_sendgridsync_root',
+            'mautic.syncdata.menu.root' => [
+                'id'        => 'mautic_syncdata_root',
                 'iconClass' => 'ri-mail-check-line',
                 'priority'  => 60,
                 'children'  => [
-                    'mautic.sendgridsync.menu.dashboard' => [
-                        'route' => 'mautic_sendgridsync_dashboard',
+                    'mautic.syncdata.menu.dashboard' => [
+                        'route' => 'mautic_syncdata_dashboard',
                     ],
-                    'mautic.sendgridsync.menu.settings' => [
-                        'route'  => 'mautic_sendgridsync_settings',
-                        'access' => 'sendgridsync:manage',
+                    'mautic.syncdata.menu.settings' => [
+                        'route'  => 'mautic_syncdata_settings',
+                        'access' => 'syncdata:manage',
                     ],
                 ],
             ],
@@ -603,17 +603,17 @@ return [
 
     'services' => [
         'integrations' => [
-            'mautic.integration.sendgridsync' => [
-                'class' => \MauticPlugin\MauticSendGridSyncBundle\Integration\SendGridSyncIntegration::class,
-                'tags'  => [['name' => 'mautic.integration', 'alias' => 'SendGridSync']],
+            'mautic.integration.syncdata' => [
+                'class' => \MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration::class,
+                'tags'  => [['name' => 'mautic.integration', 'alias' => 'SyncData']],
             ],
         ],
         'others' => [
             // Services defined here — see Section 6
         ],
         'commands' => [
-            'mautic.sendgridsync.command.sync' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Command\SyncCommand::class,
+            'mautic.syncdata.command.sync' => [
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Command\SyncCommand::class,
                 'tags'      => [['name' => 'console.command']],
             ],
         ],
@@ -656,10 +656,10 @@ SettingsController
 
 ### Phase 1: Foundation
 1. Bundle class, `composer.json`, `Config/config.php` (skeleton)
-2. `SendGridSyncIntegration` class
+2. `SyncDataIntegration` class
 3. `SyncLog` entity + migration
 4. `Suppression` entity + migration
-5. `SendGridSyncPermissions`
+5. `SyncDataPermissions`
 6. Menu registration
 
 ### Phase 2: Sync Engine
@@ -676,7 +676,7 @@ SettingsController
 15. `DashboardController` (page + all AJAX endpoints + CSV export)
 16. `Views/Dashboard/index.html.twig` (cards, charts, tables)
 17. `Assets/js/dashboard.js` (Chart.js rendering, AJAX, filters)
-18. `Assets/css/sendgridsync.css`
+18. `Assets/css/syncdata.css`
 
 ### Phase 4: Settings & Notifications
 19. `SettingsController` (form, save, test connection)

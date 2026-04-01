@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Form\Type;
+namespace MauticPlugin\MauticSyncDataBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -13,7 +13,7 @@ class ConfigAuthType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('api_key', PasswordType::class, [
-            'label'      => 'mautic.sendgridsync.settings.api_key',
+            'label'      => 'mautic.syncdata.settings.api_key',
             'label_attr' => ['class' => 'control-label'],
             'attr'       => [
                 'class'       => 'form-control',
@@ -26,6 +26,6 @@ class ConfigAuthType extends AbstractType
 
     public function getBlockPrefix(): string
     {
-        return 'sendgridsync_config_auth';
+        return 'syncdata_config_auth';
     }
 }

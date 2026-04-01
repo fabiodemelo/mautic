@@ -1,4 +1,4 @@
-var SendGridSync = (function () {
+var SyncData = (function () {
     'use strict';
 
     var breakdownChart = null;
@@ -11,7 +11,7 @@ var SendGridSync = (function () {
     }
 
     function renderBreakdownChart() {
-        var ctx = document.getElementById('sgs-breakdown-chart');
+        var ctx = document.getElementById('sd-breakdown-chart');
         if (!ctx || !sgsBreakdownData || !sgsBreakdownData.data.length) return;
 
         breakdownChart = new Chart(ctx.getContext('2d'), {
@@ -48,7 +48,7 @@ var SendGridSync = (function () {
     }
 
     function renderTrendChart() {
-        var ctx = document.getElementById('sgs-trend-chart');
+        var ctx = document.getElementById('sd-trend-chart');
         if (!ctx || !sgsTrendData) return;
 
         var datasets = sgsTrendData.datasets.map(function (ds) {
@@ -89,21 +89,21 @@ var SendGridSync = (function () {
 
     function bindEvents() {
         // Period toggle for "New" card
-        document.querySelectorAll('.sgs-period').forEach(function (el) {
+        document.querySelectorAll('.sd-period').forEach(function (el) {
             el.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelectorAll('.sgs-period').forEach(function (p) { p.classList.remove('active'); });
+                document.querySelectorAll('.sd-period').forEach(function (p) { p.classList.remove('active'); });
                 this.classList.add('active');
                 var period = this.dataset.period;
                 var value = period === '24h' ? sgsStats.new_24h :
                             period === '7d' ? sgsStats.new_7d : sgsStats.new_30d;
-                document.getElementById('sgs-new').textContent = value.toLocaleString();
+                document.getElementById('sd-new').textContent = value.toLocaleString();
             });
         });
 
         // Trend chart filters
-        var periodSelect = document.getElementById('sgs-trend-period');
-        var typeSelect = document.getElementById('sgs-trend-type');
+        var periodSelect = document.getElementById('sd-trend-period');
+        var typeSelect = document.getElementById('sd-trend-type');
 
         if (periodSelect) {
             periodSelect.addEventListener('change', function () { updateTrendChart(); });
@@ -113,8 +113,8 @@ var SendGridSync = (function () {
         }
 
         // Suppressions search
-        var searchInput = document.getElementById('sgs-search-email');
-        var filterType = document.getElementById('sgs-filter-type');
+        var searchInput = document.getElementById('sd-search-email');
+        var filterType = document.getElementById('sd-filter-type');
         var searchTimeout = null;
 
         if (searchInput) {
@@ -129,10 +129,10 @@ var SendGridSync = (function () {
     }
 
     function updateTrendChart() {
-        var period = document.getElementById('sgs-trend-period').value;
-        var type = document.getElementById('sgs-trend-type').value;
+        var period = document.getElementById('sd-trend-period').value;
+        var type = document.getElementById('sd-trend-type').value;
 
-        var url = mauticBaseUrl + 's/plugins/sendgridsync/dashboard/chart/trend?period=' + period;
+        var url = mauticBaseUrl + 's/plugins/syncdata/dashboard/chart/trend?period=' + period;
         if (type) url += '&suppression_type=' + type;
 
         fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
@@ -148,10 +148,10 @@ var SendGridSync = (function () {
     }
 
     function loadSuppressions(page) {
-        var email = (document.getElementById('sgs-search-email') || {}).value || '';
-        var type = (document.getElementById('sgs-filter-type') || {}).value || '';
+        var email = (document.getElementById('sd-search-email') || {}).value || '';
+        var type = (document.getElementById('sd-filter-type') || {}).value || '';
 
-        var url = mauticBaseUrl + 's/plugins/sendgridsync/dashboard/suppressions?page=' + page;
+        var url = mauticBaseUrl + 's/plugins/syncdata/dashboard/suppressions?page=' + page;
         if (email) url += '&email=' + encodeURIComponent(email);
         if (type) url += '&type=' + encodeURIComponent(type);
 
@@ -163,7 +163,7 @@ var SendGridSync = (function () {
     }
 
     function renderSuppressions(data) {
-        var tbody = document.getElementById('sgs-suppressions-body');
+        var tbody = document.getElementById('sd-suppressions-body');
         if (!tbody) return;
 
         var html = '';
@@ -176,8 +176,8 @@ var SendGridSync = (function () {
 
             html += '<tr>' +
                 '<td>' + emailCell + '</td>' +
-                '<td><span class="label sgs-type-' + item.type + '">' + escapeHtml(item.type_label) + '</span></td>' +
-                '<td class="sgs-reason-cell" title="' + escapeHtml(item.reason || '') + '">' + escapeHtml((item.reason || '-').substring(0, 60)) + '</td>' +
+                '<td><span class="label sd-type-' + item.type + '">' + escapeHtml(item.type_label) + '</span></td>' +
+                '<td class="sd-reason-cell" title="' + escapeHtml(item.reason || '') + '">' + escapeHtml((item.reason || '-').substring(0, 60)) + '</td>' +
                 '<td>' + escapeHtml(item.sendgrid_date) + '</td>' +
                 '<td>' + escapeHtml(item.synced_date) + '</td>' +
                 '<td><span class="label label-' + actionClass + '">' + item.action.toUpperCase() + '</span></td>' +
@@ -187,12 +187,12 @@ var SendGridSync = (function () {
         tbody.innerHTML = html || '<tr><td colspan="6" class="text-center">No results found</td></tr>';
 
         // Update pagination
-        var pagDiv = document.getElementById('sgs-suppressions-pagination');
+        var pagDiv = document.getElementById('sd-suppressions-pagination');
         if (pagDiv && data.pages > 1) {
             var pagHtml = '<nav><ul class="pagination pagination-sm">';
             for (var p = 1; p <= data.pages; p++) {
                 pagHtml += '<li class="' + (p === data.page ? 'active' : '') + '">' +
-                    '<a href="#" onclick="SendGridSync.loadSuppressions(' + p + '); return false;">' + p + '</a></li>';
+                    '<a href="#" onclick="SyncData.loadSuppressions(' + p + '); return false;">' + p + '</a></li>';
             }
             pagHtml += '</ul></nav>';
             pagDiv.innerHTML = pagHtml;
@@ -202,13 +202,13 @@ var SendGridSync = (function () {
     }
 
     function runSync() {
-        var btn = document.getElementById('sgs-sync-btn');
+        var btn = document.getElementById('sd-sync-btn');
         if (!btn) return;
 
         btn.disabled = true;
         btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Syncing...';
 
-        fetch(mauticBaseUrl + 's/plugins/sendgridsync/sync/run', {
+        fetch(mauticBaseUrl + 's/plugins/syncdata/sync/run', {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',

@@ -1,66 +1,66 @@
 {% extends '@MauticCore/Default/content.html.twig' %}
 
-{% block headerTitle %}{{ 'mautic.sendgridsync.dashboard.title'|trans }}{% endblock %}
+{% block headerTitle %}{{ 'mautic.syncdata.dashboard.title'|trans }}{% endblock %}
 
 {% block actions %}
     <div class="btn-group ml-5">
-        <button id="sgs-sync-btn" class="btn btn-default" onclick="SendGridSync.runSync()">
-            <i class="ri-refresh-line"></i> {{ 'mautic.sendgridsync.dashboard.run_sync'|trans }}
+        <button id="sd-sync-btn" class="btn btn-default" onclick="SyncData.runSync()">
+            <i class="ri-refresh-line"></i> {{ 'mautic.syncdata.dashboard.run_sync'|trans }}
         </button>
     </div>
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ asset('plugins/MauticSendGridSyncBundle/Assets/css/sendgridsync.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/MauticSyncDataBundle/Assets/css/syncdata.css') }}">
 
-<div class="sgs-dashboard">
+<div class="sd-dashboard">
     {# Summary Cards #}
-    <div class="row sgs-cards">
+    <div class="row sd-cards">
         <div class="col-md-3">
-            <div class="sgs-card sgs-card-primary">
-                <div class="sgs-card-icon"><i class="ri-shield-check-line"></i></div>
-                <div class="sgs-card-body">
-                    <div class="sgs-card-value" id="sgs-total">{{ stats.total_synced|number_format }}</div>
-                    <div class="sgs-card-label">{{ 'mautic.sendgridsync.dashboard.total_synced'|trans }}</div>
+            <div class="sd-card sd-card-primary">
+                <div class="sd-card-icon"><i class="ri-shield-check-line"></i></div>
+                <div class="sd-card-body">
+                    <div class="sd-card-value" id="sd-total">{{ stats.total_synced|number_format }}</div>
+                    <div class="sd-card-label">{{ 'mautic.syncdata.dashboard.total_synced'|trans }}</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="sgs-card sgs-card-info">
-                <div class="sgs-card-icon"><i class="ri-add-circle-line"></i></div>
-                <div class="sgs-card-body">
-                    <div class="sgs-card-value" id="sgs-new">{{ stats.new_24h|number_format }}</div>
-                    <div class="sgs-card-label">
-                        <span class="sgs-period-toggle">
-                            <a href="#" class="sgs-period active" data-period="24h">24h</a> |
-                            <a href="#" class="sgs-period" data-period="7d">7d</a> |
-                            <a href="#" class="sgs-period" data-period="30d">30d</a>
+            <div class="sd-card sd-card-info">
+                <div class="sd-card-icon"><i class="ri-add-circle-line"></i></div>
+                <div class="sd-card-body">
+                    <div class="sd-card-value" id="sd-new">{{ stats.new_24h|number_format }}</div>
+                    <div class="sd-card-label">
+                        <span class="sd-period-toggle">
+                            <a href="#" class="sd-period active" data-period="24h">24h</a> |
+                            <a href="#" class="sd-period" data-period="7d">7d</a> |
+                            <a href="#" class="sd-period" data-period="30d">30d</a>
                         </span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="sgs-card sgs-card-success">
-                <div class="sgs-card-icon"><i class="ri-user-shield-line"></i></div>
-                <div class="sgs-card-body">
-                    <div class="sgs-card-value" id="sgs-protected">{{ stats.contacts_protected|number_format }}</div>
-                    <div class="sgs-card-label">{{ 'mautic.sendgridsync.dashboard.contacts_protected'|trans }}</div>
+            <div class="sd-card sd-card-success">
+                <div class="sd-card-icon"><i class="ri-user-shield-line"></i></div>
+                <div class="sd-card-body">
+                    <div class="sd-card-value" id="sd-protected">{{ stats.contacts_protected|number_format }}</div>
+                    <div class="sd-card-label">{{ 'mautic.syncdata.dashboard.contacts_protected'|trans }}</div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="sgs-card sgs-card-{% if stats.last_sync.status == 'success' %}success{% elseif stats.last_sync.status == 'failed' %}danger{% else %}default{% endif %}">
-                <div class="sgs-card-icon"><i class="ri-time-line"></i></div>
-                <div class="sgs-card-body">
-                    <div class="sgs-card-value" id="sgs-lastsync">
+            <div class="sd-card sd-card-{% if stats.last_sync.status == 'success' %}success{% elseif stats.last_sync.status == 'failed' %}danger{% else %}default{% endif %}">
+                <div class="sd-card-icon"><i class="ri-time-line"></i></div>
+                <div class="sd-card-body">
+                    <div class="sd-card-value" id="sd-lastsync">
                         {% if stats.last_sync.time %}
                             {{ stats.last_sync.time }}
                         {% else %}
-                            {{ 'mautic.sendgridsync.dashboard.never'|trans }}
+                            {{ 'mautic.syncdata.dashboard.never'|trans }}
                         {% endif %}
                     </div>
-                    <div class="sgs-card-label">{{ 'mautic.sendgridsync.dashboard.last_sync'|trans }}</div>
+                    <div class="sd-card-label">{{ 'mautic.syncdata.dashboard.last_sync'|trans }}</div>
                 </div>
             </div>
         </div>
@@ -71,15 +71,15 @@
         <div class="col-md-5">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">{{ 'mautic.sendgridsync.dashboard.breakdown'|trans }}</h3>
+                    <h3 class="panel-title">{{ 'mautic.syncdata.dashboard.breakdown'|trans }}</h3>
                 </div>
                 <div class="panel-body">
-                    <div class="sgs-chart-container">
-                        <canvas id="sgs-breakdown-chart"></canvas>
+                    <div class="sd-chart-container">
+                        <canvas id="sd-breakdown-chart"></canvas>
                     </div>
                     {% if stats.total_synced == 0 %}
-                        <div class="sgs-empty-state">
-                            <p>{{ 'mautic.sendgridsync.dashboard.no_data'|trans }}</p>
+                        <div class="sd-empty-state">
+                            <p>{{ 'mautic.syncdata.dashboard.no_data'|trans }}</p>
                         </div>
                     {% endif %}
                 </div>
@@ -89,25 +89,25 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        {{ 'mautic.sendgridsync.dashboard.trends'|trans }}
-                        <div class="pull-right sgs-chart-filters">
-                            <select id="sgs-trend-period" class="form-control input-sm" style="display:inline-block;width:auto;">
-                                <option value="7d">{{ 'mautic.sendgridsync.filter.period.7d'|trans }}</option>
-                                <option value="30d" selected>{{ 'mautic.sendgridsync.filter.period.30d'|trans }}</option>
-                                <option value="90d">{{ 'mautic.sendgridsync.filter.period.90d'|trans }}</option>
+                        {{ 'mautic.syncdata.dashboard.trends'|trans }}
+                        <div class="pull-right sd-chart-filters">
+                            <select id="sd-trend-period" class="form-control input-sm" style="display:inline-block;width:auto;">
+                                <option value="7d">{{ 'mautic.syncdata.filter.period.7d'|trans }}</option>
+                                <option value="30d" selected>{{ 'mautic.syncdata.filter.period.30d'|trans }}</option>
+                                <option value="90d">{{ 'mautic.syncdata.filter.period.90d'|trans }}</option>
                             </select>
-                            <select id="sgs-trend-type" class="form-control input-sm" style="display:inline-block;width:auto;">
-                                <option value="">{{ 'mautic.sendgridsync.filter.all_types'|trans }}</option>
+                            <select id="sd-trend-type" class="form-control input-sm" style="display:inline-block;width:auto;">
+                                <option value="">{{ 'mautic.syncdata.filter.all_types'|trans }}</option>
                                 {% for type in types %}
-                                    <option value="{{ type }}">{{ ('mautic.sendgridsync.type.' ~ type)|trans }}</option>
+                                    <option value="{{ type }}">{{ ('mautic.syncdata.type.' ~ type)|trans }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                     </h3>
                 </div>
                 <div class="panel-body">
-                    <div class="sgs-chart-container sgs-chart-wide">
-                        <canvas id="sgs-trend-chart"></canvas>
+                    <div class="sd-chart-container sd-chart-wide">
+                        <canvas id="sd-trend-chart"></canvas>
                     </div>
                 </div>
             </div>
@@ -120,35 +120,35 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        {{ 'mautic.sendgridsync.dashboard.recent'|trans }}
+                        {{ 'mautic.syncdata.dashboard.recent'|trans }}
                         <div class="pull-right">
-                            <input type="text" id="sgs-search-email" class="form-control input-sm" placeholder="{{ 'mautic.sendgridsync.filter.search'|trans }}" style="display:inline-block;width:200px;">
-                            <select id="sgs-filter-type" class="form-control input-sm" style="display:inline-block;width:auto;">
-                                <option value="">{{ 'mautic.sendgridsync.filter.all_types'|trans }}</option>
+                            <input type="text" id="sd-search-email" class="form-control input-sm" placeholder="{{ 'mautic.syncdata.filter.search'|trans }}" style="display:inline-block;width:200px;">
+                            <select id="sd-filter-type" class="form-control input-sm" style="display:inline-block;width:auto;">
+                                <option value="">{{ 'mautic.syncdata.filter.all_types'|trans }}</option>
                                 {% for type in types %}
-                                    <option value="{{ type }}">{{ ('mautic.sendgridsync.type.' ~ type)|trans }}</option>
+                                    <option value="{{ type }}">{{ ('mautic.syncdata.type.' ~ type)|trans }}</option>
                                 {% endfor %}
                             </select>
-                            <a href="{{ path('mautic_sendgridsync_dashboard_export') }}" class="btn btn-sm btn-default">
-                                <i class="ri-download-line"></i> {{ 'mautic.sendgridsync.dashboard.export_csv'|trans }}
+                            <a href="{{ path('mautic_syncdata_dashboard_export') }}" class="btn btn-sm btn-default">
+                                <i class="ri-download-line"></i> {{ 'mautic.syncdata.dashboard.export_csv'|trans }}
                             </a>
                         </div>
                     </h3>
                 </div>
                 <div class="panel-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover" id="sgs-suppressions-table">
+                        <table class="table table-striped table-hover" id="sd-suppressions-table">
                             <thead>
                                 <tr>
-                                    <th>{{ 'mautic.sendgridsync.table.email'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.type'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.reason'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.sendgrid_date'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.synced_date'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.action'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.email'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.type'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.reason'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.sendgrid_date'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.synced_date'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.action'|trans }}</th>
                                 </tr>
                             </thead>
-                            <tbody id="sgs-suppressions-body">
+                            <tbody id="sd-suppressions-body">
                                 {% for item in recent.items %}
                                 <tr>
                                     <td>
@@ -158,8 +158,8 @@
                                             {{ item.email }}
                                         {% endif %}
                                     </td>
-                                    <td><span class="label sgs-type-{{ item.type }}">{{ item.type_label }}</span></td>
-                                    <td class="sgs-reason-cell" title="{{ item.reason }}">{{ item.reason|default('-')|truncate(60) }}</td>
+                                    <td><span class="label sd-type-{{ item.type }}">{{ item.type_label }}</span></td>
+                                    <td class="sd-reason-cell" title="{{ item.reason }}">{{ item.reason|default('-')|truncate(60) }}</td>
                                     <td>{{ item.sendgrid_date }}</td>
                                     <td>{{ item.synced_date }}</td>
                                     <td><span class="label label-{{ item.action == 'dnc' ? 'danger' : (item.action == 'segment' ? 'info' : 'default') }}">{{ item.action|upper }}</span></td>
@@ -168,13 +168,13 @@
                             </tbody>
                         </table>
                     </div>
-                    <div id="sgs-suppressions-pagination" class="text-center">
+                    <div id="sd-suppressions-pagination" class="text-center">
                         {% if recent.pages > 1 %}
                             <nav>
                                 <ul class="pagination pagination-sm">
                                     {% for p in 1..recent.pages %}
                                         <li class="{{ p == recent.page ? 'active' : '' }}">
-                                            <a href="#" onclick="SendGridSync.loadSuppressions({{ p }}); return false;">{{ p }}</a>
+                                            <a href="#" onclick="SyncData.loadSuppressions({{ p }}); return false;">{{ p }}</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -191,24 +191,24 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">{{ 'mautic.sendgridsync.dashboard.sync_history'|trans }}</h3>
+                    <h3 class="panel-title">{{ 'mautic.syncdata.dashboard.sync_history'|trans }}</h3>
                 </div>
                 <div class="panel-body">
                     <div class="table-responsive">
-                        <table class="table table-striped" id="sgs-history-table">
+                        <table class="table table-striped" id="sd-history-table">
                             <thead>
                                 <tr>
-                                    <th>{{ 'mautic.sendgridsync.table.status'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.type'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.started'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.duration'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.fetched'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.added'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.skipped'|trans }}</th>
-                                    <th>{{ 'mautic.sendgridsync.table.unmatched'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.status'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.type'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.started'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.duration'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.fetched'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.added'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.skipped'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.unmatched'|trans }}</th>
                                 </tr>
                             </thead>
-                            <tbody id="sgs-history-body">
+                            <tbody id="sd-history-body">
                                 {% for log in history.items %}
                                 <tr>
                                     <td>
@@ -239,5 +239,5 @@
     var sgsTrendData     = {{ trend|json_encode|raw }};
     var sgsStats         = {{ stats|json_encode|raw }};
 </script>
-<script src="{{ asset('plugins/MauticSendGridSyncBundle/Assets/js/dashboard.js') }}"></script>
+<script src="{{ asset('plugins/MauticSyncDataBundle/Assets/js/dashboard.js') }}"></script>
 {% endblock %}

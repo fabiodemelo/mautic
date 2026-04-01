@@ -11,55 +11,55 @@ return [
     'routes' => [
         'main' => [
             // Dashboard
-            'mautic_sendgridsync_dashboard' => [
-                'path'       => '/plugins/sendgridsync/dashboard',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::indexAction',
+            'mautic_syncdata_dashboard' => [
+                'path'       => '/plugins/syncdata/dashboard',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::indexAction',
             ],
-            'mautic_sendgridsync_dashboard_stats' => [
-                'path'       => '/plugins/sendgridsync/dashboard/stats',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::statsAction',
+            'mautic_syncdata_dashboard_stats' => [
+                'path'       => '/plugins/syncdata/dashboard/stats',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::statsAction',
             ],
-            'mautic_sendgridsync_dashboard_chart' => [
-                'path'       => '/plugins/sendgridsync/dashboard/chart/{type}',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::chartDataAction',
+            'mautic_syncdata_dashboard_chart' => [
+                'path'       => '/plugins/syncdata/dashboard/chart/{type}',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::chartDataAction',
             ],
-            'mautic_sendgridsync_dashboard_suppressions' => [
-                'path'       => '/plugins/sendgridsync/dashboard/suppressions',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::suppressionsAction',
+            'mautic_syncdata_dashboard_suppressions' => [
+                'path'       => '/plugins/syncdata/dashboard/suppressions',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::suppressionsAction',
             ],
-            'mautic_sendgridsync_dashboard_history' => [
-                'path'       => '/plugins/sendgridsync/dashboard/history',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::historyAction',
+            'mautic_syncdata_dashboard_history' => [
+                'path'       => '/plugins/syncdata/dashboard/history',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::historyAction',
             ],
-            'mautic_sendgridsync_dashboard_export' => [
-                'path'       => '/plugins/sendgridsync/dashboard/export',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\DashboardController::exportAction',
+            'mautic_syncdata_dashboard_export' => [
+                'path'       => '/plugins/syncdata/dashboard/export',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::exportAction',
             ],
 
             // Sync
-            'mautic_sendgridsync_sync_run' => [
-                'path'       => '/plugins/sendgridsync/sync/run',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SyncController::runAction',
+            'mautic_syncdata_sync_run' => [
+                'path'       => '/plugins/syncdata/sync/run',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SyncController::runAction',
                 'method'     => 'POST',
             ],
-            'mautic_sendgridsync_sync_status' => [
-                'path'       => '/plugins/sendgridsync/sync/status/{logId}',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SyncController::statusAction',
+            'mautic_syncdata_sync_status' => [
+                'path'       => '/plugins/syncdata/sync/status/{logId}',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SyncController::statusAction',
             ],
 
             // Settings
-            'mautic_sendgridsync_settings' => [
-                'path'       => '/plugins/sendgridsync/settings',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SettingsController::indexAction',
+            'mautic_syncdata_settings' => [
+                'path'       => '/plugins/syncdata/settings',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SettingsController::indexAction',
             ],
-            'mautic_sendgridsync_settings_save' => [
-                'path'       => '/plugins/sendgridsync/settings/save',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SettingsController::saveAction',
+            'mautic_syncdata_settings_save' => [
+                'path'       => '/plugins/syncdata/settings/save',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SettingsController::saveAction',
                 'method'     => 'POST',
             ],
-            'mautic_sendgridsync_settings_test' => [
-                'path'       => '/plugins/sendgridsync/settings/test',
-                'controller' => 'MauticPlugin\MauticSendGridSyncBundle\Controller\SettingsController::testConnectionAction',
+            'mautic_syncdata_settings_test' => [
+                'path'       => '/plugins/syncdata/settings/test',
+                'controller' => 'MauticPlugin\MauticSyncDataBundle\Controller\SettingsController::testConnectionAction',
                 'method'     => 'POST',
             ],
         ],
@@ -67,17 +67,17 @@ return [
 
     'menu' => [
         'main' => [
-            'mautic.sendgridsync.menu.root' => [
-                'id'        => 'mautic_sendgridsync_root',
+            'mautic.syncdata.menu.root' => [
+                'id'        => 'mautic_syncdata_root',
                 'iconClass' => 'ri-mail-check-line',
                 'priority'  => 60,
                 'children'  => [
-                    'mautic.sendgridsync.menu.dashboard' => [
-                        'route' => 'mautic_sendgridsync_dashboard',
+                    'mautic.syncdata.menu.dashboard' => [
+                        'route' => 'mautic_syncdata_dashboard',
                     ],
-                    'mautic.sendgridsync.menu.settings' => [
-                        'route'  => 'mautic_sendgridsync_settings',
-                        'access' => 'plugin:sendgridsync:settings:manage',
+                    'mautic.syncdata.menu.settings' => [
+                        'route'  => 'mautic_syncdata_settings',
+                        'access' => 'plugin:syncdata:settings:manage',
                     ],
                 ],
             ],
@@ -86,8 +86,8 @@ return [
 
     'services' => [
         'integrations' => [
-            'mautic.integration.sendgridsync' => [
-                'class' => \MauticPlugin\MauticSendGridSyncBundle\Integration\SendGridSyncIntegration::class,
+            'mautic.integration.syncdata' => [
+                'class' => \MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration::class,
                 'tags'  => [
                     'mautic.integration',
                     'mautic.basic_integration',
@@ -96,51 +96,51 @@ return [
             ],
         ],
         'others' => [
-            'mautic.sendgridsync.service.api_client' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Service\SendGridApiClient::class,
+            'mautic.syncdata.service.api_client' => [
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient::class,
                 'arguments' => [
                     'mautic.http.client',
                     'monolog.logger.mautic',
                 ],
             ],
-            'mautic.sendgridsync.service.suppression_fetcher' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Service\SuppressionFetcher::class,
+            'mautic.syncdata.service.suppression_fetcher' => [
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Service\SuppressionFetcher::class,
                 'arguments' => [
-                    'mautic.sendgridsync.service.api_client',
+                    'mautic.syncdata.service.api_client',
                     'monolog.logger.mautic',
                 ],
             ],
-            'mautic.sendgridsync.service.dnc_mapper' => [
-                'class' => \MauticPlugin\MauticSendGridSyncBundle\Service\DncMapper::class,
+            'mautic.syncdata.service.dnc_mapper' => [
+                'class' => \MauticPlugin\MauticSyncDataBundle\Service\DncMapper::class,
             ],
-            'mautic.sendgridsync.service.contact_resolver' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Service\ContactResolver::class,
+            'mautic.syncdata.service.contact_resolver' => [
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Service\ContactResolver::class,
                 'arguments' => [
                     'mautic.lead.model.lead',
                     'doctrine.orm.entity_manager',
                 ],
             ],
-            'mautic.sendgridsync.service.sync_engine' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Service\SyncEngine::class,
+            'mautic.syncdata.service.sync_engine' => [
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Service\SyncEngine::class,
                 'arguments' => [
-                    'mautic.sendgridsync.service.suppression_fetcher',
-                    'mautic.sendgridsync.service.contact_resolver',
-                    'mautic.sendgridsync.service.dnc_mapper',
+                    'mautic.syncdata.service.suppression_fetcher',
+                    'mautic.syncdata.service.contact_resolver',
+                    'mautic.syncdata.service.dnc_mapper',
                     'mautic.lead.model.dnc',
                     'mautic.lead.model.list',
                     'doctrine.orm.entity_manager',
-                    'mautic.sendgridsync.service.notification_service',
+                    'mautic.syncdata.service.notification_service',
                     'monolog.logger.mautic',
                 ],
             ],
-            'mautic.sendgridsync.service.stats_calculator' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Service\StatsCalculator::class,
+            'mautic.syncdata.service.stats_calculator' => [
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Service\StatsCalculator::class,
                 'arguments' => [
                     'doctrine.orm.entity_manager',
                 ],
             ],
-            'mautic.sendgridsync.service.notification_service' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Service\NotificationService::class,
+            'mautic.syncdata.service.notification_service' => [
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Service\NotificationService::class,
                 'arguments' => [
                     'mautic.helper.mailer',
                     'monolog.logger.mautic',
@@ -148,10 +148,10 @@ return [
             ],
         ],
         'command' => [
-            'mautic.sendgridsync.command.sync' => [
-                'class'     => \MauticPlugin\MauticSendGridSyncBundle\Command\SyncCommand::class,
+            'mautic.syncdata.command.sync' => [
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Command\SyncCommand::class,
                 'arguments' => [
-                    'mautic.sendgridsync.service.sync_engine',
+                    'mautic.syncdata.service.sync_engine',
                     'mautic.integrations.helper',
                 ],
                 'tags' => ['console.command'],

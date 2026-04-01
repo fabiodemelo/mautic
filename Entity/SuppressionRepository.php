@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Entity;
+namespace MauticPlugin\MauticSyncDataBundle\Entity;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -67,7 +67,7 @@ class SuppressionRepository extends ServiceEntityRepository
 
         $qb = $this->getEntityManager()->getConnection()->createQueryBuilder()
             ->select("DATE(synced_at) as date_label, COUNT(*) as cnt")
-            ->from('plugin_sendgrid_suppressions')
+            ->from('plugin_syncdata_suppressions')
             ->where('synced_at >= :since')
             ->setParameter('since', $since->format('Y-m-d'))
             ->groupBy('date_label')

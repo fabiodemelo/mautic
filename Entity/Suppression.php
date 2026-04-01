@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Entity;
+namespace MauticPlugin\MauticSyncDataBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SuppressionRepository::class)]
-#[ORM\Table(name: 'plugin_sendgrid_suppressions')]
-#[ORM\Index(columns: ['email'], name: 'idx_sgs_email')]
-#[ORM\Index(columns: ['suppression_type'], name: 'idx_sgs_type')]
-#[ORM\Index(columns: ['synced_at'], name: 'idx_sgs_synced_at')]
-#[ORM\Index(columns: ['mautic_contact_id'], name: 'idx_sgs_contact')]
-#[ORM\UniqueConstraint(name: 'uniq_sgs_email_type_date', columns: ['email', 'suppression_type', 'sendgrid_created_at'])]
+#[ORM\Table(name: 'plugin_syncdata_suppressions')]
+#[ORM\Index(columns: ['email'], name: 'idx_sd_email')]
+#[ORM\Index(columns: ['suppression_type'], name: 'idx_sd_type')]
+#[ORM\Index(columns: ['synced_at'], name: 'idx_sd_synced_at')]
+#[ORM\Index(columns: ['mautic_contact_id'], name: 'idx_sd_contact')]
+#[ORM\UniqueConstraint(name: 'uniq_sd_email_type_date', columns: ['email', 'suppression_type', 'sendgrid_created_at'])]
 class Suppression
 {
     public const TYPE_BOUNCE             = 'bounce';

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Service;
+namespace MauticPlugin\MauticSyncDataBundle\Service;
 
 use Mautic\LeadBundle\Entity\DoNotContact;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
 
 class DncMapper
 {

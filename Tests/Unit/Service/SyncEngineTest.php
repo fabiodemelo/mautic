@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Tests\Unit\Service;
+namespace MauticPlugin\MauticSyncDataBundle\Tests\Unit\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Mautic\LeadBundle\Entity\Lead;
 use Mautic\LeadBundle\Model\DoNotContactModel;
 use Mautic\LeadBundle\Model\ListModel;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SuppressionRepository;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SyncLog;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SyncLogRepository;
-use MauticPlugin\MauticSendGridSyncBundle\Service\ContactResolver;
-use MauticPlugin\MauticSendGridSyncBundle\Service\DncMapper;
-use MauticPlugin\MauticSendGridSyncBundle\Service\NotificationService;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SuppressionFetcher;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SyncEngine;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Entity\SuppressionRepository;
+use MauticPlugin\MauticSyncDataBundle\Entity\SyncLog;
+use MauticPlugin\MauticSyncDataBundle\Entity\SyncLogRepository;
+use MauticPlugin\MauticSyncDataBundle\Service\ContactResolver;
+use MauticPlugin\MauticSyncDataBundle\Service\DncMapper;
+use MauticPlugin\MauticSyncDataBundle\Service\NotificationService;
+use MauticPlugin\MauticSyncDataBundle\Service\SuppressionFetcher;
+use MauticPlugin\MauticSyncDataBundle\Service\SyncEngine;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;

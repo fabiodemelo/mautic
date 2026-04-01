@@ -1,13 +1,13 @@
 {% extends '@MauticCore/Default/content.html.twig' %}
 
-{% block headerTitle %}{{ 'mautic.sendgridsync.settings.title'|trans }}{% endblock %}
+{% block headerTitle %}{{ 'mautic.syncdata.settings.title'|trans }}{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ asset('plugins/MauticSendGridSyncBundle/Assets/css/sendgridsync.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/MauticSyncDataBundle/Assets/css/syncdata.css') }}">
 
-<div class="sgs-settings">
-    <form id="sgs-settings-form" method="POST" action="{{ path('mautic_sendgridsync_settings_save') }}">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('sendgridsync_settings') }}">
+<div class="sd-settings">
+    <form id="sd-settings-form" method="POST" action="{{ path('mautic_syncdata_settings_save') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('syncdata_settings') }}">
 
         {# API Connection #}
         <div class="panel panel-default">
@@ -18,19 +18,19 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="control-label" for="sgs-api-key">{{ 'mautic.sendgridsync.settings.api_key'|trans }}</label>
+                            <label class="control-label" for="sd-api-key">{{ 'mautic.syncdata.settings.api_key'|trans }}</label>
                             <div class="input-group">
-                                <input type="password" id="sgs-api-key" name="api_key" class="form-control"
+                                <input type="password" id="sd-api-key" name="api_key" class="form-control"
                                        placeholder="{{ hasApiKey ? '••••••••••••••••' : 'SG.xxxxxxxxxx' }}"
                                        autocomplete="off">
                                 <span class="input-group-btn">
-                                    <button type="button" class="btn btn-default" id="sgs-test-btn" onclick="testConnection()">
-                                        <i class="ri-link"></i> {{ 'mautic.sendgridsync.settings.test_connection'|trans }}
+                                    <button type="button" class="btn btn-default" id="sd-test-btn" onclick="testConnection()">
+                                        <i class="ri-link"></i> {{ 'mautic.syncdata.settings.test_connection'|trans }}
                                     </button>
                                 </span>
                             </div>
-                            <p class="help-block">{{ 'mautic.sendgridsync.settings.api_key.help'|trans }}</p>
-                            <div id="sgs-test-result" style="margin-top: 10px;"></div>
+                            <p class="help-block">{{ 'mautic.syncdata.settings.api_key.help'|trans }}</p>
+                            <div id="sd-test-result" style="margin-top: 10px;"></div>
                         </div>
                     </div>
                 </div>
@@ -40,34 +40,34 @@
         {# Suppression Types #}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="ri-list-check-2"></i> {{ 'mautic.sendgridsync.settings.enabled_types'|trans }}</h3>
+                <h3 class="panel-title"><i class="ri-list-check-2"></i> {{ 'mautic.syncdata.settings.enabled_types'|trans }}</h3>
             </div>
             <div class="panel-body">
                 <div class="row">
                     {% for type in types %}
                     <div class="col-md-4">
-                        <div class="sgs-type-config">
+                        <div class="sd-type-config">
                             <div class="checkbox">
                                 <label>
                                     <input type="checkbox" name="enabled_types[]" value="{{ type }}"
                                            {{ type in (settings.enabled_types|default(types)) ? 'checked' : '' }}>
-                                    {{ ('mautic.sendgridsync.type.' ~ type)|trans }}
+                                    {{ ('mautic.syncdata.type.' ~ type)|trans }}
                                 </label>
                             </div>
                             <div class="form-group form-group-sm" style="margin-left: 20px;">
-                                <label class="control-label">{{ 'mautic.sendgridsync.settings.action_mode'|trans }}</label>
-                                <select name="action_modes[{{ type }}]" class="form-control input-sm sgs-action-mode" data-type="{{ type }}">
+                                <label class="control-label">{{ 'mautic.syncdata.settings.action_mode'|trans }}</label>
+                                <select name="action_modes[{{ type }}]" class="form-control input-sm sd-action-mode" data-type="{{ type }}">
                                     <option value="dnc" {{ (settings.action_modes[type]|default('dnc')) == 'dnc' ? 'selected' : '' }}>
-                                        {{ 'mautic.sendgridsync.settings.action_dnc'|trans }}
+                                        {{ 'mautic.syncdata.settings.action_dnc'|trans }}
                                     </option>
                                     <option value="segment" {{ (settings.action_modes[type]|default('')) == 'segment' ? 'selected' : '' }}>
-                                        {{ 'mautic.sendgridsync.settings.action_segment'|trans }}
+                                        {{ 'mautic.syncdata.settings.action_segment'|trans }}
                                     </option>
                                 </select>
-                                <select name="target_segments[{{ type }}]" class="form-control input-sm sgs-segment-select mt-sm"
+                                <select name="target_segments[{{ type }}]" class="form-control input-sm sd-segment-select mt-sm"
                                         data-type="{{ type }}"
                                         style="{{ (settings.action_modes[type]|default('dnc')) == 'segment' ? '' : 'display:none;' }}">
-                                    <option value="">-- {{ 'mautic.sendgridsync.settings.target_segment'|trans }} --</option>
+                                    <option value="">-- {{ 'mautic.syncdata.settings.target_segment'|trans }} --</option>
                                     {% for segId, segName in segments %}
                                         <option value="{{ segId }}" {{ (settings.target_segments[type]|default('')) == segId ? 'selected' : '' }}>
                                             {{ segName }}
@@ -91,7 +91,7 @@
                 <div class="row">
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label class="control-label">{{ 'mautic.sendgridsync.settings.sync_interval'|trans }}</label>
+                            <label class="control-label">{{ 'mautic.syncdata.settings.sync_interval'|trans }}</label>
                             <select name="sync_interval" class="form-control">
                                 {% for val, label in intervalChoices %}
                                     <option value="{{ val }}" {{ (settings.sync_interval|default(15)) == val ? 'selected' : '' }}>{{ label }}</option>
@@ -101,7 +101,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label class="control-label">{{ 'mautic.sendgridsync.settings.initial_range'|trans }}</label>
+                            <label class="control-label">{{ 'mautic.syncdata.settings.initial_range'|trans }}</label>
                             <select name="initial_sync_range" class="form-control">
                                 {% for val, label in rangeChoices %}
                                     <option value="{{ val }}" {{ (settings.initial_sync_range|default(30)) == val ? 'selected' : '' }}>{{ label }}</option>
@@ -111,7 +111,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label class="control-label">{{ 'mautic.sendgridsync.settings.notification_email'|trans }}</label>
+                            <label class="control-label">{{ 'mautic.syncdata.settings.notification_email'|trans }}</label>
                             <input type="email" name="notification_email" class="form-control"
                                    value="{{ settings.notification_email|default('') }}"
                                    placeholder="admin@example.com">
@@ -119,10 +119,10 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label class="control-label">{{ 'mautic.sendgridsync.settings.spike_threshold'|trans }}</label>
+                            <label class="control-label">{{ 'mautic.syncdata.settings.spike_threshold'|trans }}</label>
                             <input type="number" name="spike_threshold" class="form-control"
                                    value="{{ settings.spike_threshold|default(50) }}" min="1">
-                            <p class="help-block">{{ 'mautic.sendgridsync.settings.spike_threshold.help'|trans }}</p>
+                            <p class="help-block">{{ 'mautic.syncdata.settings.spike_threshold.help'|trans }}</p>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                 <button type="submit" class="btn btn-primary">
                     <i class="ri-save-line"></i> Save Settings
                 </button>
-                <a href="{{ path('mautic_sendgridsync_dashboard') }}" class="btn btn-default">
+                <a href="{{ path('mautic_syncdata_dashboard') }}" class="btn btn-default">
                     Cancel
                 </a>
             </div>
@@ -145,9 +145,9 @@
 
 <script>
 function testConnection() {
-    var btn = document.getElementById('sgs-test-btn');
-    var resultDiv = document.getElementById('sgs-test-result');
-    var apiKey = document.getElementById('sgs-api-key').value;
+    var btn = document.getElementById('sd-test-btn');
+    var resultDiv = document.getElementById('sd-test-result');
+    var apiKey = document.getElementById('sd-api-key').value;
 
     btn.disabled = true;
     btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Testing...';
@@ -156,7 +156,7 @@ function testConnection() {
     var formData = new FormData();
     formData.append('api_key', apiKey);
 
-    fetch('{{ path("mautic_sendgridsync_settings_test") }}', {
+    fetch('{{ path("mautic_syncdata_settings_test") }}', {
         method: 'POST',
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': mauticAjaxCsrf },
         body: formData
@@ -179,10 +179,10 @@ function testConnection() {
 }
 
 // Toggle segment selector visibility based on action mode
-document.querySelectorAll('.sgs-action-mode').forEach(function (select) {
+document.querySelectorAll('.sd-action-mode').forEach(function (select) {
     select.addEventListener('change', function () {
         var type = this.dataset.type;
-        var segSelect = document.querySelector('.sgs-segment-select[data-type="' + type + '"]');
+        var segSelect = document.querySelector('.sd-segment-select[data-type="' + type + '"]');
         if (segSelect) {
             segSelect.style.display = this.value === 'segment' ? '' : 'none';
         }

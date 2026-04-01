@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Service;
+namespace MauticPlugin\MauticSyncDataBundle\Service;
 
 use Mautic\CoreBundle\Helper\MailHelper;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SyncLog;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Entity\SyncLog;
 use Psr\Log\LoggerInterface;
 
 class NotificationService

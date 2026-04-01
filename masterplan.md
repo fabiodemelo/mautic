@@ -1,8 +1,8 @@
-# MauticSendGridSync Plugin — Product Masterplan
+# MauticSyncData Plugin — Product Masterplan
 
 ## 1. Product Overview
 
-**Plugin Name:** MauticSendGridSync (Mautic SendGrid Suppression Sync)
+**Plugin Name:** MauticSyncData (Mautic SendGrid Suppression Sync)
 **Tagline:** "Protect your sender reputation — automatically sync SendGrid suppressions to Mautic's Do Not Contact list."
 
 ### The Problem
@@ -159,7 +159,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 
 ### Flow 1: Initial Setup
 1. Admin installs plugin (copy to `plugins/` or install via Marketplace)
-2. Navigate to Settings > Plugins > MauticSendGridSync
+2. Navigate to Settings > Plugins > MauticSyncData
 3. Click "Configure"
 4. Enter SendGrid API Key
 5. Click "Test Connection" — shows success/fail with account info
@@ -169,7 +169,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 9. Dashboard populates with initial data
 
 ### Flow 2: Automatic Sync (Background)
-1. Cron fires `mautic:sendgrid:sync` command
+1. Cron fires `mautic:syncdata:sync` command
 2. Plugin fetches suppressions since last sync timestamp
 3. For each suppressed email:
    a. Look up contact in Mautic by email
@@ -274,7 +274,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 - [ ] Contact lookup by email
 - [ ] DNC writer service
 - [ ] Sync history entity and repository
-- [ ] Console command: `mautic:sendgrid:sync`
+- [ ] Console command: `mautic:syncdata:sync`
 
 ### Phase 3: Dashboard UI (Week 3-4)
 - [ ] Dashboard controller and route
@@ -345,15 +345,15 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 ## 12. File Structure
 
 ```
-plugins/MauticSendGridSyncBundle/
-├── MauticSendGridSyncBundle.php          # Bundle registration
+plugins/MauticSyncDataBundle/
+├── MauticSyncDataBundle.php          # Bundle registration
 ├── composer.json                          # Package metadata & dependencies
 ├── README.md                              # Documentation
 ├── LICENSE                                # License file
 │
 ├── Assets/
 │   ├── css/
-│   │   └── sendgridsync.css              # Plugin styles
+│   │   └── syncdata.css              # Plugin styles
 │   └── js/
 │       └── dashboard.js                   # Dashboard charts & interactions (uses Mautic's native Chart.js)
 │
@@ -383,13 +383,13 @@ plugins/MauticSendGridSyncBundle/
 │   │   └── SyncSettingsType.php          # Sync configuration form
 │
 ├── Integration/
-│   ├── SendGridSyncIntegration.php       # Main integration class
+│   ├── SyncDataIntegration.php       # Main integration class
 │   ├── Configuration.php                 # Integration configuration
 │   └── Support/
 │       └── ConfigSupport.php             # Config form handling
 │
 ├── Command/
-│   └── SyncCommand.php                   # mautic:sendgrid:sync CLI command
+│   └── SyncCommand.php                   # mautic:syncdata:sync CLI command
 │
 ├── Service/
 │   ├── SendGridApiClient.php             # HTTP client for SendGrid API
@@ -419,7 +419,7 @@ plugins/MauticSendGridSyncBundle/
 │
 ├── Security/
 │   └── Permissions/
-│       └── SendGridSyncPermissions.php   # Role-based permissions
+│       └── SyncDataPermissions.php   # Role-based permissions
 │
 └── Tests/
     ├── Unit/
@@ -437,7 +437,7 @@ plugins/MauticSendGridSyncBundle/
 
 ## 13. Database Schema
 
-### Table: `plugin_sendgrid_sync_log`
+### Table: `plugin_syncdata_log`
 | Column | Type | Description |
 |--------|------|-------------|
 | id | INT (PK, AI) | Primary key |
@@ -453,7 +453,7 @@ plugins/MauticSendGridSyncBundle/
 | suppression_breakdown | JSON | `{"bounces": 12, "spam": 3, ...}` |
 | created_at | DATETIME | Record creation timestamp |
 
-### Table: `plugin_sendgrid_suppressions`
+### Table: `plugin_syncdata_suppressions`
 | Column | Type | Description |
 |--------|------|-------------|
 | id | INT (PK, AI) | Primary key |
@@ -484,7 +484,7 @@ Settings are stored via Mautic's IntegrationsBundle native mechanism:
 - **Feature toggles & sync config** → `Integration::getFeatureSettings()`
 
 Only sync-specific runtime state needs custom storage:
-- `last_sync_timestamp` (per suppression type) → stored in `plugin_sendgrid_sync_log` (derived from latest successful log entry)
+- `last_sync_timestamp` (per suppression type) → stored in `plugin_syncdata_log` (derived from latest successful log entry)
 - No custom settings table needed — reduces schema footprint
 
 ---

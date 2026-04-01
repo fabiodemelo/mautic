@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Service;
+namespace MauticPlugin\MauticSyncDataBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SuppressionRepository;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SyncLog;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SyncLogRepository;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Entity\SuppressionRepository;
+use MauticPlugin\MauticSyncDataBundle\Entity\SyncLog;
+use MauticPlugin\MauticSyncDataBundle\Entity\SyncLogRepository;
 
 class StatsCalculator
 {

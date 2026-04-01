@@ -1,5 +1,5 @@
 {
-    "name": "mauticplugin/sendgridsync-bundle",
+    "name": "mauticplugin/syncdata-bundle",
     "description": "Sync SendGrid suppressions (bounces, spam reports, blocks, invalid emails, unsubscribes) to Mautic DNC or segments.",
     "type": "mautic-plugin",
     "version": "1.0.0",
@@ -17,10 +17,10 @@
     },
     "autoload": {
         "psr-4": {
-            "MauticPlugin\\MauticSendGridSyncBundle\\": ""
+            "MauticPlugin\\MauticSyncDataBundle\\": ""
         }
     },
     "extra": {
-        "install-directory-name": "MauticSendGridSyncBundle"
+        "install-directory-name": "MauticSyncDataBundle"
     }
 }

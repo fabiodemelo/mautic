@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Tests\Unit\Service;
+namespace MauticPlugin\MauticSyncDataBundle\Tests\Unit\Service;
 
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SendGridApiClient;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SuppressionFetcher;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient;
+use MauticPlugin\MauticSyncDataBundle\Service\SuppressionFetcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;

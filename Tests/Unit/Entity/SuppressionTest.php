@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Tests\Unit\Entity;
+namespace MauticPlugin\MauticSyncDataBundle\Tests\Unit\Entity;
 
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
 use PHPUnit\Framework\TestCase;
 
 class SuppressionTest extends TestCase

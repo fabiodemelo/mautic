@@ -1,15 +1,15 @@
 /* SendGrid Sync Dashboard Styles */
 
-.sgs-dashboard {
+.sd-dashboard {
     padding: 0;
 }
 
 /* Summary Cards */
-.sgs-cards {
+.sd-cards {
     margin-bottom: 20px;
 }
 
-.sgs-card {
+.sd-card {
     display: flex;
     align-items: center;
     background: #fff;
@@ -21,101 +21,101 @@
     transition: box-shadow 0.2s;
 }
 
-.sgs-card:hover {
+.sd-card:hover {
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
-.sgs-card-primary { border-left-color: #4e5d9d; }
-.sgs-card-info    { border-left-color: #3498db; }
-.sgs-card-success { border-left-color: #27ae60; }
-.sgs-card-danger  { border-left-color: #e74c3c; }
-.sgs-card-default { border-left-color: #95a5a6; }
+.sd-card-primary { border-left-color: #4e5d9d; }
+.sd-card-info    { border-left-color: #3498db; }
+.sd-card-success { border-left-color: #27ae60; }
+.sd-card-danger  { border-left-color: #e74c3c; }
+.sd-card-default { border-left-color: #95a5a6; }
 
-.sgs-card-icon {
+.sd-card-icon {
     font-size: 32px;
     margin-right: 15px;
     opacity: 0.6;
 }
 
-.sgs-card-primary .sgs-card-icon { color: #4e5d9d; }
-.sgs-card-info .sgs-card-icon    { color: #3498db; }
-.sgs-card-success .sgs-card-icon { color: #27ae60; }
-.sgs-card-danger .sgs-card-icon  { color: #e74c3c; }
-.sgs-card-default .sgs-card-icon { color: #95a5a6; }
+.sd-card-primary .sd-card-icon { color: #4e5d9d; }
+.sd-card-info .sd-card-icon    { color: #3498db; }
+.sd-card-success .sd-card-icon { color: #27ae60; }
+.sd-card-danger .sd-card-icon  { color: #e74c3c; }
+.sd-card-default .sd-card-icon { color: #95a5a6; }
 
-.sgs-card-body {
+.sd-card-body {
     flex: 1;
 }
 
-.sgs-card-value {
+.sd-card-value {
     font-size: 28px;
     font-weight: 700;
     line-height: 1.2;
     color: #2c3e50;
 }
 
-.sgs-card-label {
+.sd-card-label {
     font-size: 13px;
     color: #7f8c8d;
     margin-top: 2px;
 }
 
 /* Period toggle */
-.sgs-period-toggle a {
+.sd-period-toggle a {
     font-size: 12px;
     color: #95a5a6;
     text-decoration: none;
     padding: 2px 4px;
 }
 
-.sgs-period-toggle a.active {
+.sd-period-toggle a.active {
     color: #3498db;
     font-weight: 600;
 }
 
-.sgs-period-toggle a:hover {
+.sd-period-toggle a:hover {
     color: #2980b9;
 }
 
 /* Charts */
-.sgs-chart-container {
+.sd-chart-container {
     position: relative;
     height: 300px;
     width: 100%;
 }
 
-.sgs-chart-wide {
+.sd-chart-wide {
     height: 300px;
 }
 
-.sgs-chart-filters {
+.sd-chart-filters {
     display: inline-flex;
     gap: 8px;
     align-items: center;
 }
 
-.sgs-chart-filters select {
+.sd-chart-filters select {
     font-size: 12px;
 }
 
 /* Type labels */
-.sgs-type-bounce             { background-color: #e74c3c; color: #fff; }
-.sgs-type-spam_report        { background-color: #e67e22; color: #fff; }
-.sgs-type-block              { background-color: #f1c40f; color: #333; }
-.sgs-type-invalid_email      { background-color: #9b59b6; color: #fff; }
-.sgs-type-global_unsubscribe { background-color: #3498db; color: #fff; }
-.sgs-type-group_unsubscribe  { background-color: #1abc9c; color: #fff; }
+.sd-type-bounce             { background-color: #e74c3c; color: #fff; }
+.sd-type-spam_report        { background-color: #e67e22; color: #fff; }
+.sd-type-block              { background-color: #f1c40f; color: #333; }
+.sd-type-invalid_email      { background-color: #9b59b6; color: #fff; }
+.sd-type-global_unsubscribe { background-color: #3498db; color: #fff; }
+.sd-type-group_unsubscribe  { background-color: #1abc9c; color: #fff; }
 
 /* Tables */
-.sgs-reason-cell {
+.sd-reason-cell {
     max-width: 250px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-#sgs-suppressions-table th,
-#sgs-history-table th {
+#sd-suppressions-table th,
+#sd-history-table th {
     font-weight: 600;
     font-size: 13px;
     color: #7f8c8d;
@@ -123,22 +123,22 @@
 }
 
 /* Empty state */
-.sgs-empty-state {
+.sd-empty-state {
     text-align: center;
     padding: 40px 20px;
     color: #95a5a6;
 }
 
-.sgs-empty-state p {
+.sd-empty-state p {
     font-size: 14px;
 }
 
 /* Sync button animation */
 .ri-spin {
-    animation: sgs-spin 1s linear infinite;
+    animation: sd-spin 1s linear infinite;
 }
 
-@keyframes sgs-spin {
+@keyframes sd-spin {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
 }
@@ -149,8 +149,8 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-    .sgs-card-value { font-size: 22px; }
-    .sgs-chart-container { height: 250px; }
-    .sgs-chart-filters { flex-direction: column; }
+    .sd-card-value { font-size: 22px; }
+    .sd-chart-container { height: 250px; }
+    .sd-chart-filters { flex-direction: column; }
     .panel-heading .pull-right { float: none !important; margin-top: 10px; }
 }

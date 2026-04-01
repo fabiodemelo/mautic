@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Controller;
+namespace MauticPlugin\MauticSyncDataBundle\Controller;
 
 use Mautic\CoreBundle\Controller\AbstractFormController;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
-use MauticPlugin\MauticSendGridSyncBundle\Service\StatsCalculator;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Service\StatsCalculator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +21,7 @@ class DashboardController extends AbstractFormController
 
     public function indexAction(): Response
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:dashboard:view')) {
+        if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return $this->accessDenied();
         }
 
@@ -40,18 +40,18 @@ class DashboardController extends AbstractFormController
                 'history'   => $history,
                 'types'     => Suppression::ALL_TYPES,
             ],
-            'contentTemplate' => '@MauticSendGridSync/Dashboard/index.html.twig',
+            'contentTemplate' => '@MauticSyncData/Dashboard/index.html.twig',
             'passthroughVars' => [
-                'activeLink'    => '#mautic_sendgridsync_dashboard',
-                'mauticContent' => 'sendgridsync',
-                'route'         => $this->generateUrl('mautic_sendgridsync_dashboard'),
+                'activeLink'    => '#mautic_syncdata_dashboard',
+                'mauticContent' => 'syncdata',
+                'route'         => $this->generateUrl('mautic_syncdata_dashboard'),
             ],
         ]);
     }
 
     public function statsAction(): JsonResponse
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:dashboard:view')) {
+        if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
         }
 
@@ -60,7 +60,7 @@ class DashboardController extends AbstractFormController
 
     public function chartDataAction(Request $request, string $type): JsonResponse
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:dashboard:view')) {
+        if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
         }
 
@@ -80,7 +80,7 @@ class DashboardController extends AbstractFormController
 
     public function suppressionsAction(Request $request): JsonResponse
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:dashboard:view')) {
+        if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
         }
 
@@ -100,7 +100,7 @@ class DashboardController extends AbstractFormController
 
     public function historyAction(Request $request): JsonResponse
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:dashboard:view')) {
+        if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
         }
 
@@ -112,7 +112,7 @@ class DashboardController extends AbstractFormController
 
     public function exportAction(Request $request): Response
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:settings:manage')) {
+        if (!$this->security->isGranted('plugin:syncdata:settings:manage')) {
             return $this->accessDenied();
         }
 
@@ -150,7 +150,7 @@ class DashboardController extends AbstractFormController
         });
 
         $response->headers->set('Content-Type', 'text/csv');
-        $response->headers->set('Content-Disposition', 'attachment; filename="sendgrid_suppressions_'.date('Y-m-d').'.csv"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="syncdata_suppressions_'.date('Y-m-d').'.csv"');
 
         return $response;
     }

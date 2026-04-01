@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Controller;
+namespace MauticPlugin\MauticSyncDataBundle\Controller;
 
 use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\IntegrationsBundle\Helper\IntegrationsHelper;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
-use MauticPlugin\MauticSendGridSyncBundle\Integration\SendGridSyncIntegration;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SendGridApiClient;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration;
+use MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +23,7 @@ class SettingsController extends AbstractFormController
 
     public function indexAction(): Response
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:settings:manage')) {
+        if (!$this->security->isGranted('plugin:syncdata:settings:manage')) {
             return $this->accessDenied();
         }
 
@@ -46,23 +46,23 @@ class SettingsController extends AbstractFormController
                     7 => '7 days', 30 => '30 days', 90 => '90 days', 0 => 'All time',
                 ],
             ],
-            'contentTemplate' => '@MauticSendGridSync/Settings/index.html.twig',
+            'contentTemplate' => '@MauticSyncData/Settings/index.html.twig',
             'passthroughVars' => [
-                'activeLink'    => '#mautic_sendgridsync_settings',
-                'mauticContent' => 'sendgridsyncSettings',
-                'route'         => $this->generateUrl('mautic_sendgridsync_settings'),
+                'activeLink'    => '#mautic_syncdata_settings',
+                'mauticContent' => 'syncdataSettings',
+                'route'         => $this->generateUrl('mautic_syncdata_settings'),
             ],
         ]);
     }
 
     public function saveAction(Request $request): Response
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:settings:manage')) {
+        if (!$this->security->isGranted('plugin:syncdata:settings:manage')) {
             return $this->accessDenied();
         }
 
         try {
-            $integration       = $this->integrationsHelper->getIntegration(SendGridSyncIntegration::NAME);
+            $integration       = $this->integrationsHelper->getIntegration(SyncDataIntegration::NAME);
             $integrationConfig = $integration->getIntegrationConfiguration();
 
             // Save API key
@@ -89,17 +89,17 @@ class SettingsController extends AbstractFormController
             $this->entityManager->persist($integrationConfig);
             $this->entityManager->flush();
 
-            $this->addFlashMessage('mautic.sendgridsync.settings.saved');
+            $this->addFlashMessage('mautic.syncdata.settings.saved');
         } catch (\Throwable $e) {
-            $this->addFlashMessage('mautic.sendgridsync.settings.save_failed', ['%error%' => $e->getMessage()]);
+            $this->addFlashMessage('mautic.syncdata.settings.save_failed', ['%error%' => $e->getMessage()]);
         }
 
-        return $this->redirectToRoute('mautic_sendgridsync_settings');
+        return $this->redirectToRoute('mautic_syncdata_settings');
     }
 
     public function testConnectionAction(Request $request): JsonResponse
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:settings:manage')) {
+        if (!$this->security->isGranted('plugin:syncdata:settings:manage')) {
             return new JsonResponse(['success' => false, 'error' => 'Access denied'], 403);
         }
 
@@ -124,7 +124,7 @@ class SettingsController extends AbstractFormController
     private function getSettings(): array
     {
         try {
-            $integration       = $this->integrationsHelper->getIntegration(SendGridSyncIntegration::NAME);
+            $integration       = $this->integrationsHelper->getIntegration(SyncDataIntegration::NAME);
             $integrationConfig = $integration->getIntegrationConfiguration();
 
             return $integrationConfig->getFeatureSettings() ?? [];
@@ -136,7 +136,7 @@ class SettingsController extends AbstractFormController
     private function getApiKeys(): array
     {
         try {
-            $integration       = $this->integrationsHelper->getIntegration(SendGridSyncIntegration::NAME);
+            $integration       = $this->integrationsHelper->getIntegration(SyncDataIntegration::NAME);
             $integrationConfig = $integration->getIntegrationConfiguration();
 
             return $integrationConfig->getApiKeys() ?? [];

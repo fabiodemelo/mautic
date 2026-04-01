@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Security\Permissions;
+namespace MauticPlugin\MauticSyncDataBundle\Security\Permissions;
 
 use Mautic\CoreBundle\Security\Permissions\AbstractPermissions;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class SendGridSyncPermissions extends AbstractPermissions
+class SyncDataPermissions extends AbstractPermissions
 {
     public function __construct($params)
     {
@@ -19,12 +19,12 @@ class SendGridSyncPermissions extends AbstractPermissions
 
     public function getName(): string
     {
-        return 'sendgridsync';
+        return 'syncdata';
     }
 
     public function buildForm(FormBuilderInterface &$builder, array $options, array $data): void
     {
-        $this->addStandardFormFields('sendgridsync', 'dashboard', $builder, $data);
-        $this->addStandardFormFields('sendgridsync', 'settings', $builder, $data);
+        $this->addStandardFormFields('syncdata', 'dashboard', $builder, $data);
+        $this->addStandardFormFields('syncdata', 'settings', $builder, $data);
     }
 }

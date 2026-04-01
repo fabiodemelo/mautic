@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Tests\Unit\Service;
+namespace MauticPlugin\MauticSyncDataBundle\Tests\Unit\Service;
 
 use Mautic\LeadBundle\Entity\DoNotContact;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\Suppression;
-use MauticPlugin\MauticSendGridSyncBundle\Service\DncMapper;
+use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
+use MauticPlugin\MauticSyncDataBundle\Service\DncMapper;
 use PHPUnit\Framework\TestCase;
 
 class DncMapperTest extends TestCase

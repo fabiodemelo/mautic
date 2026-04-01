@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Migrations;
+namespace MauticPlugin\MauticSyncDataBundle\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
@@ -11,16 +11,16 @@ final class Version20260330002 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Create plugin_sendgrid_suppressions table';
+        return 'Create plugin_syncdata_suppressions table';
     }
 
     public function up(Schema $schema): void
     {
-        if ($schema->hasTable('plugin_sendgrid_suppressions')) {
+        if ($schema->hasTable('plugin_syncdata_suppressions')) {
             return;
         }
 
-        $table = $schema->createTable('plugin_sendgrid_suppressions');
+        $table = $schema->createTable('plugin_syncdata_suppressions');
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
         $table->addColumn('email', 'string', ['length' => 255]);
         $table->addColumn('suppression_type', 'string', ['length' => 30]);
@@ -35,15 +35,15 @@ final class Version20260330002 extends AbstractMigration
         $table->addColumn('created_at', 'datetime');
 
         $table->setPrimaryKey(['id']);
-        $table->addIndex(['email'], 'idx_sgs_email');
-        $table->addIndex(['suppression_type'], 'idx_sgs_type');
-        $table->addIndex(['synced_at'], 'idx_sgs_synced_at');
-        $table->addIndex(['mautic_contact_id'], 'idx_sgs_contact');
-        $table->addUniqueIndex(['email', 'suppression_type', 'sendgrid_created_at'], 'uniq_sgs_email_type_date');
+        $table->addIndex(['email'], 'idx_sd_email');
+        $table->addIndex(['suppression_type'], 'idx_sd_type');
+        $table->addIndex(['synced_at'], 'idx_sd_synced_at');
+        $table->addIndex(['mautic_contact_id'], 'idx_sd_contact');
+        $table->addUniqueIndex(['email', 'suppression_type', 'sendgrid_created_at'], 'uniq_sd_email_type_date');
     }
 
     public function down(Schema $schema): void
     {
-        $schema->dropTable('plugin_sendgrid_suppressions');
+        $schema->dropTable('plugin_syncdata_suppressions');
     }
 }

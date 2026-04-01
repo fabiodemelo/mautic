@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace MauticPlugin\MauticSendGridSyncBundle\Controller;
+namespace MauticPlugin\MauticSyncDataBundle\Controller;
 
 use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\IntegrationsBundle\Helper\IntegrationsHelper;
-use MauticPlugin\MauticSendGridSyncBundle\Entity\SyncLog;
-use MauticPlugin\MauticSendGridSyncBundle\Integration\SendGridSyncIntegration;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SendGridApiClient;
-use MauticPlugin\MauticSendGridSyncBundle\Service\SyncEngine;
+use MauticPlugin\MauticSyncDataBundle\Entity\SyncLog;
+use MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration;
+use MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient;
+use MauticPlugin\MauticSyncDataBundle\Service\SyncEngine;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class SyncController extends AbstractFormController
@@ -23,12 +23,12 @@ class SyncController extends AbstractFormController
 
     public function runAction(): JsonResponse
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:settings:manage')) {
+        if (!$this->security->isGranted('plugin:syncdata:settings:manage')) {
             return new JsonResponse(['success' => false, 'error' => 'Access denied'], 403);
         }
 
         try {
-            $integration       = $this->integrationsHelper->getIntegration(SendGridSyncIntegration::NAME);
+            $integration       = $this->integrationsHelper->getIntegration(SyncDataIntegration::NAME);
             $integrationConfig = $integration->getIntegrationConfiguration();
             $apiKeys           = $integrationConfig->getApiKeys();
             $featureSettings   = $integrationConfig->getFeatureSettings() ?? [];
@@ -73,7 +73,7 @@ class SyncController extends AbstractFormController
 
     public function statusAction(int $logId): JsonResponse
     {
-        if (!$this->security->isGranted('plugin:sendgridsync:dashboard:view')) {
+        if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
         }
 
