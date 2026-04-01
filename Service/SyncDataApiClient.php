@@ -7,7 +7,7 @@ namespace MauticPlugin\MauticSyncDataBundle\Service;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class SendGridApiClient
+class SyncDataApiClient
 {
     private const BASE_URL    = 'https://api.sendgrid.com';
     private const PAGE_LIMIT  = 500;
@@ -108,7 +108,7 @@ class SendGridApiClient
     private function request(string $method, string $endpoint, array $query = []): array
     {
         if (null === $this->apiKey || '' === $this->apiKey) {
-            throw new \RuntimeException('SendGrid API key is not configured.');
+            throw new \RuntimeException('SyncData API key is not configured.');
         }
 
         $options = [
@@ -124,7 +124,7 @@ class SendGridApiClient
 
         $url = self::BASE_URL.$endpoint;
 
-        $this->logger->debug('SendGrid API request', ['method' => $method, 'url' => $url]);
+        $this->logger->debug('SyncData API request', ['method' => $method, 'url' => $url]);
 
         $response   = $this->httpClient->request($method, $url, $options);
         $statusCode = $response->getStatusCode();
@@ -135,12 +135,12 @@ class SendGridApiClient
             $errors  = $decoded['errors'] ?? [];
             $message = !empty($errors) ? $errors[0]['message'] : "HTTP {$statusCode}";
 
-            $this->logger->error('SendGrid API error', [
+            $this->logger->error('SyncData API error', [
                 'status' => $statusCode,
                 'body'   => $body,
             ]);
 
-            throw new \RuntimeException("SendGrid API error: {$message}");
+            throw new \RuntimeException("SyncData API error: {$message}");
         }
 
         $headers = $response->getHeaders();
@@ -154,7 +154,7 @@ class SendGridApiClient
         $remaining = $headers['x-ratelimit-remaining'][0] ?? null;
 
         if (null !== $remaining && (int) $remaining < 10) {
-            $this->logger->warning('SendGrid rate limit nearly exhausted', [
+            $this->logger->warning('SyncData rate limit nearly exhausted', [
                 'remaining' => $remaining,
             ]);
             usleep(500000); // 0.5s pause

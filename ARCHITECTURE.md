@@ -40,7 +40,7 @@ A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC 
 | `started_at` | DATETIME | No | Sync start time |
 | `completed_at` | DATETIME | Yes | Sync end time |
 | `status` | VARCHAR(20) | No | `running`, `success`, `partial`, `failed` |
-| `records_fetched` | INT | No | Total records from SendGrid (default 0) |
+| `records_fetched` | INT | No | Total records from the provider (default 0) |
 | `records_added` | INT | No | New DNC/segment entries created (default 0) |
 | `records_skipped` | INT | No | Already in DNC (default 0) |
 | `records_unmatched` | INT | No | No matching Mautic contact (default 0) |
@@ -64,11 +64,11 @@ A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC 
 | `id` | INT (PK, AUTO) | No | Primary key |
 | `email` | VARCHAR(255) | No | Suppressed email address |
 | `suppression_type` | VARCHAR(30) | No | `bounce`, `spam_report`, `block`, `invalid_email`, `global_unsubscribe`, `group_unsubscribe` |
-| `sendgrid_reason` | TEXT | Yes | Original reason from SendGrid |
-| `sendgrid_status` | VARCHAR(50) | Yes | Bounce/block status code |
-| `sendgrid_created_at` | DATETIME | No | When SendGrid recorded it |
-| `sendgrid_group_id` | INT | Yes | Unsubscribe group ID |
-| `sendgrid_group_name` | VARCHAR(100) | Yes | Unsubscribe group name |
+| `source_reason` | TEXT | Yes | Original reason from the provider |
+| `source_status` | VARCHAR(50) | Yes | Bounce/block status code |
+| `source_created_at` | DATETIME | No | When SendGrid recorded it |
+| `source_group_id` | INT | Yes | Unsubscribe group ID |
+| `source_group_name` | VARCHAR(100) | Yes | Unsubscribe group name |
 | `mautic_contact_id` | INT | Yes | Matched Mautic contact ID |
 | `action_taken` | VARCHAR(20) | No | `dnc`, `segment`, `unmatched` |
 | `synced_at` | DATETIME | No | When this record was synced |
@@ -79,7 +79,7 @@ A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC 
 - `idx_type` on `suppression_type`
 - `idx_synced_at` on `synced_at`
 - `idx_contact` on `mautic_contact_id`
-- `UNIQUE idx_email_type_date` on (`email`, `suppression_type`, `sendgrid_created_at`)
+- `UNIQUE idx_email_type_date` on (`email`, `suppression_type`, `source_created_at`)
 
 ---
 
@@ -127,7 +127,7 @@ All routes require authentication (Mautic admin session).
 |--------|-------|------------|------------|-------------|
 | GET | `/s/plugins/syncdata/settings` | `SettingsController::indexAction` | `syncdata:manage` | Settings page |
 | POST | `/s/plugins/syncdata/settings/save` | `SettingsController::saveAction` | `syncdata:manage` | Save settings |
-| POST | `/s/plugins/syncdata/settings/test` | `SettingsController::testConnectionAction` | `syncdata:manage` | Test SendGrid API connection (AJAX) |
+| POST | `/s/plugins/syncdata/settings/test` | `SettingsController::testConnectionAction` | `syncdata:manage` | Test SyncData API connection (AJAX) |
 
 ---
 
@@ -156,12 +156,12 @@ Options:
 
 ## 6. Service Layer
 
-### 6.1 `SendGridApiClient`
+### 6.1 `SyncDataApiClient`
 
 HTTP client for SendGrid v3 API.
 
 ```php
-class SendGridApiClient
+class SyncDataApiClient
 {
     // Dependencies: HttpClientInterface, LoggerInterface
 
@@ -182,7 +182,7 @@ class SendGridApiClient
 }
 ```
 
-**SendGrid API Endpoint Mapping:**
+**SyncData API Endpoint Mapping:**
 
 | Suppression Type | Endpoint | Pagination | Supports `start_time` |
 |-----------------|----------|------------|----------------------|
@@ -203,7 +203,7 @@ Fetches all enabled suppression types with pagination.
 ```php
 class SuppressionFetcher
 {
-    // Dependencies: SendGridApiClient, LoggerInterface
+    // Dependencies: SyncDataApiClient, LoggerInterface
 
     public function fetchAll(array $enabledTypes, int $startTime = 0): array;
     // Returns: ['bounces' => [...], 'spam_reports' => [...], ...]
@@ -248,7 +248,7 @@ class DncMapper
     // group_unsubscribe  → DoNotContact::UNSUBSCRIBED (1)
 
     public function buildComment(string $type, ?string $reason, ?string $status): string;
-    // Returns: "[SendGrid Sync] Bounce: 550 5.1.1 User unknown"
+    // Returns: "[SyncData] Bounce: 550 5.1.1 User unknown"
 }
 ```
 
@@ -380,7 +380,7 @@ class SyncDataIntegration extends AbstractIntegration
     const NAME = 'SyncData';
 
     public function getName(): string;           // 'SyncData'
-    public function getDisplayName(): string;     // 'SendGrid Suppression Sync'
+    public function getDisplayName(): string;     // 'SyncData'
     public function getIcon(): string;            // path to icon
 
     public function getRequiredKeyFields(): array;
@@ -439,7 +439,7 @@ class SyncDataPermissions extends AbstractPermissions
 ```
 Mautic Admin Sidebar
 └── Plugins (existing)
-    └── SendGrid Sync (new menu item)
+    └── SyncData (new menu item)
         ├── Dashboard (default)
         └── Settings
 ```
@@ -484,9 +484,9 @@ plugins/MauticSyncDataBundle/
 │       └── SyncDataPermissions.php       # view, manage, admin permissions
 │
 ├── Service/
-│   ├── SendGridApiClient.php                 # HTTP client for SendGrid v3 API
+│   ├── SyncDataApiClient.php                 # HTTP client for SendGrid v3 API
 │   ├── SuppressionFetcher.php                # Fetch + normalize + paginate
-│   ├── DncMapper.php                         # SendGrid type → Mautic DNC reason
+│   ├── DncMapper.php                         # suppression type → Mautic DNC reason
 │   ├── ContactResolver.php                   # Lookup contacts by email
 │   ├── SyncEngine.php                        # Orchestrator
 │   ├── StatsCalculator.php                   # Dashboard statistics
@@ -525,8 +525,8 @@ plugins/MauticSyncDataBundle/
 <?php
 
 return [
-    'name'        => 'SendGrid Suppression Sync',
-    'description' => 'Sync SendGrid suppressions to Mautic DNC or segments',
+    'name'        => 'SyncData',
+    'description' => 'Sync suppressions to Mautic DNC or segments',
     'version'     => '1.0.0',
     'author'      => 'Fabio de Melo',
 
@@ -629,7 +629,7 @@ return [
 SyncCommand
     └── SyncEngine
             ├── SuppressionFetcher
-            │       └── SendGridApiClient
+            │       └── SyncDataApiClient
             │               └── Integration (API key)
             ├── ContactResolver
             │       └── LeadModel (Mautic)
@@ -647,7 +647,7 @@ DashboardController
             └── SyncLogRepository
 
 SettingsController
-    └── SendGridApiClient (for test connection)
+    └── SyncDataApiClient (for test connection)
 ```
 
 ---
@@ -663,7 +663,7 @@ SettingsController
 6. Menu registration
 
 ### Phase 2: Sync Engine
-7. `SendGridApiClient` (all 7 endpoints + pagination + rate-limit check)
+7. `SyncDataApiClient` (all 7 endpoints + pagination + rate-limit check)
 8. `SuppressionFetcher` (normalize + paginate all types)
 9. `DncMapper`
 10. `ContactResolver` (single + batch lookup)
@@ -697,7 +697,7 @@ SettingsController
 |----------|-----------|
 | Use IntegrationsBundle (not raw PluginBundle) | Modern Mautic 5.x pattern; built-in encryption, config forms |
 | No custom settings table | IntegrationsBundle handles settings natively; less schema to maintain |
-| Suppression cache table | Enables dashboard queries without re-hitting SendGrid API |
+| Suppression cache table | Enables dashboard queries without re-hitting SyncData API |
 | Batch contact resolution | Single `WHERE email IN (...)` query instead of N queries |
 | Flush in batches of 100 | Prevents memory exhaustion on large syncs |
 | Action mode per type (DNC vs segment) | Gives admins flexibility — review before DNC for non-obvious types like blocks |

@@ -8,7 +8,7 @@ use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\IntegrationsBundle\Helper\IntegrationsHelper;
 use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
 use MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration;
-use MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient;
+use MauticPlugin\MauticSyncDataBundle\Service\SyncDataApiClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +17,7 @@ class SettingsController extends AbstractFormController
 {
     public function __construct(
         private readonly IntegrationsHelper $integrationsHelper,
-        private readonly SendGridApiClient $apiClient,
+        private readonly SyncDataApiClient $apiClient,
     ) {
     }
 

@@ -2,8 +2,8 @@
 
 ## 1. Product Overview
 
-**Plugin Name:** MauticSyncData (Mautic SendGrid Suppression Sync)
-**Tagline:** "Protect your sender reputation — automatically sync SendGrid suppressions to Mautic's Do Not Contact list."
+**Plugin Name:** MauticSyncData (Mautic SyncData)
+**Tagline:** "Protect your sender reputation — automatically sync suppressions to Mautic's Do Not Contact list."
 
 ### The Problem
 When using Mautic with SendGrid as the email transport, SendGrid maintains its own suppression lists (bounces, spam reports, blocks, invalid emails, unsubscribes). But Mautic doesn't know about them. This means:
@@ -14,7 +14,7 @@ When using Mautic with SendGrid as the email transport, SendGrid maintains its o
 
 ### The Solution
 A native Mautic plugin that:
-1. Connects to SendGrid's v3 API
+1. Connects to the provider's v3 API
 2. Automatically syncs all 7 suppression types to Mautic's DNC (Do Not Contact) system
 3. Provides a rich dashboard with charts and metrics showing suppression trends
 4. Runs on a configurable schedule (cron-based)
@@ -33,10 +33,10 @@ A native Mautic plugin that:
 
 ## 2. Core Features (MVP)
 
-### F1: SendGrid API Connection
+### F1: SyncData API Connection
 - Secure API key storage (encrypted in database)
 - Connection test button
-- Support for multiple SendGrid accounts (future)
+- Support for multiple provider accounts (future)
 
 ### F2: Suppression Sync Engine
 Sync all 7 SendGrid suppression types:
@@ -77,7 +77,7 @@ A dedicated plugin page with:
 
 #### 4d. Recent Suppressions Table
 - Paginated table of recent synced suppressions
-- Columns: Email, Type, Reason, SendGrid Date, Synced Date, Status
+- Columns: Email, Type, Reason, Source Date, Synced Date, Status
 - Search/filter by email, type, date range
 - Export to CSV
 
@@ -93,7 +93,7 @@ A dedicated plugin page with:
 - Choose DNC channel (email by default)
 - **Suppression action mode:** Admin chooses per suppression type whether to:
   - Add matched contacts to DNC (default), OR
-  - Add matched contacts to a specified Mautic segment (e.g., "SendGrid Bounced")
+  - Add matched contacts to a specified Mautic segment (e.g., "SyncData Bounced")
   - This allows non-destructive workflows where contacts are segmented for review before DNC
 
 ### F6: Notifications & Alerts
@@ -106,22 +106,22 @@ A dedicated plugin page with:
 ## 3. Extended Features (Post-MVP / Pro)
 
 ### F7: Bidirectional Sync
-- Push Mautic DNC contacts back to SendGrid's suppression list
+- Push Mautic DNC contacts back to the provider's suppression list
 - Prevents SendGrid from attempting delivery even if contacted through other channels
 
 ### F8: Webhook Receiver
-- Real-time sync via SendGrid Event Webhook
+- Real-time sync via Event Webhook
 - Instant DNC updates without polling
 - Events: `bounce`, `dropped`, `spamreport`, `unsubscribe`, `group_unsubscribe`, `group_resubscribe`
 
 ### F9: Multi-Account Support
-- Connect multiple SendGrid accounts
+- Connect multiple provider accounts
 - Per-account sync settings
 - Useful for agencies managing multiple brands
 
 ### F10: Segment Integration
 - Auto-create/update Mautic segments based on suppression type
-- Example: "SendGrid Bounced" segment, "Spam Reporters" segment
+- Example: "SyncData Bounced" segment, "Spam Reporters" segment
 - Enables targeted re-engagement or cleanup campaigns
 
 ### F11: Email Hygiene Score
@@ -138,7 +138,7 @@ A dedicated plugin page with:
 
 ### F13: Audit Log
 - Detailed log of every DNC change made by the plugin
-- Who/what triggered it, original SendGrid data, Mautic contact ID
+- Who/what triggered it, original source data, Mautic contact ID
 - Compliance-friendly (GDPR, CAN-SPAM)
 
 ---
@@ -161,7 +161,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 1. Admin installs plugin (copy to `plugins/` or install via Marketplace)
 2. Navigate to Settings > Plugins > MauticSyncData
 3. Click "Configure"
-4. Enter SendGrid API Key
+4. Enter SyncData API Key
 5. Click "Test Connection" — shows success/fail with account info
 6. Select which suppression types to sync
 7. Set sync interval
@@ -180,7 +180,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 6. If errors → send notification
 
 ### Flow 3: Viewing Dashboard
-1. User navigates to Plugin > SendGrid Sync dashboard
+1. User navigates to Plugin > SyncData dashboard
 2. Sees summary cards (total synced, new today, protected, last sync)
 3. Views suppression breakdown chart
 4. Views trend chart (filters by type/date)
@@ -189,7 +189,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 
 ### Flow 4: Investigating a Contact
 1. User views a contact's profile in Mautic
-2. Sees DNC badge with "SendGrid Bounce" or "SendGrid Spam Report"
+2. Sees DNC badge with "SyncData Bounce" or "SyncData Spam Report"
 3. Clicks to see details: original SendGrid reason, date, bounce code
 4. Can manually remove DNC if needed (with audit log entry)
 
@@ -211,7 +211,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 | **Plugin Type** | Mautic IntegrationsBundle | Modern integration framework |
 | **Templates** | Twig | Required for Mautic 5.x (no PHP templates) |
 | **Frontend Charts** | Chart.js 2.9.4 (bundled with Mautic) | Native — no extra dependencies needed |
-| **HTTP Client** | Symfony HttpClient / Guzzle | SendGrid API communication |
+| **HTTP Client** | Symfony HttpClient / Guzzle | SyncData API communication |
 | **Database** | Doctrine ORM (MySQL/MariaDB) | Mautic's ORM layer |
 | **Queue** | Mautic's command scheduler (cron) | Background sync |
 | **Testing** | PHPUnit | Mautic's test framework |
@@ -227,7 +227,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 | **Mautic DNC** | Suppression data target | Internal Mautic API (DoNotContact model) |
 | **Mautic Segments** | Auto-segment creation (Pro) | Internal Mautic API |
 
-### SendGrid API Rate Limits
+### SyncData API Rate Limits
 - 600 requests/minute across all endpoints
 - Pagination: max 500 items per request
 - Basic rate-limit awareness (check `X-RateLimit-Remaining` header, pause if near limit) — no complex backoff needed since typical sync volumes are well within limits
@@ -237,7 +237,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 ## 8. Security Considerations
 
 ### API Key Storage
-- SendGrid API key stored via IntegrationsBundle's native `getApiKeys()` (encrypted at rest automatically)
+- SyncData API key stored via IntegrationsBundle's native `getApiKeys()` (encrypted at rest automatically)
 - Never exposed in logs, UI (masked), or exports
 - Key permissions: only `Suppressions Read` scope needed (principle of least privilege)
 
@@ -260,7 +260,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 ### Phase 1: Foundation (Week 1-2)
 - [ ] Plugin scaffolding (bundle structure, config.php, composer.json)
 - [ ] Integration class with ConfigForm (API key input)
-- [ ] SendGrid API client service (authenticated HTTP client)
+- [ ] SyncData API client service (authenticated HTTP client)
 - [ ] Connection test functionality
 - [ ] Basic plugin settings page
 - [ ] Version compatibility: Mautic >=5.0, PHP >=8.1
@@ -270,7 +270,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 - [ ] Pagination handling (500 items/page)
 - [ ] Rate limiting with backoff
 - [ ] Incremental sync logic (start_time tracking)
-- [ ] DNC mapper (SendGrid type → Mautic DNC reason)
+- [ ] DNC mapper (suppression type → Mautic DNC reason)
 - [ ] Contact lookup by email
 - [ ] DNC writer service
 - [ ] Sync history entity and repository
@@ -293,7 +293,7 @@ Plugin uses Mautic's built-in permission system (`PluginBundle` security).
 - [ ] Unsubscribe group mapping UI
 - [ ] Email notifications on failure
 - [ ] Spike detection alerts
-- [ ] Contact detail integration (DNC badge with SendGrid info)
+- [ ] Contact detail integration (DNC badge with source info)
 
 ### Phase 5: Testing & Polish (Week 5-6)
 - [ ] Unit tests (sync engine, DNC mapper, API client)
@@ -392,9 +392,9 @@ plugins/MauticSyncDataBundle/
 │   └── SyncCommand.php                   # mautic:syncdata:sync CLI command
 │
 ├── Service/
-│   ├── SendGridApiClient.php             # HTTP client for SendGrid API
+│   ├── SyncDataApiClient.php             # HTTP client for SyncData API
 │   ├── SuppressionFetcher.php            # Fetch suppressions by type
-│   ├── DncMapper.php                     # Map SendGrid types → Mautic DNC
+│   ├── DncMapper.php                     # Map suppression types → Mautic DNC
 │   ├── SyncEngine.php                    # Orchestrates the sync process
 │   ├── ContactResolver.php              # Lookup Mautic contacts by email
 │   ├── NotificationService.php           # Email alerts & notifications
@@ -445,7 +445,7 @@ plugins/MauticSyncDataBundle/
 | started_at | DATETIME | Sync start time |
 | completed_at | DATETIME | Sync end time |
 | status | VARCHAR(20) | 'success', 'partial', 'failed' |
-| records_fetched | INT | Total records from SendGrid |
+| records_fetched | INT | Total records from the provider |
 | records_added | INT | New DNC entries created |
 | records_skipped | INT | Already existed in DNC |
 | records_unmatched | INT | No matching Mautic contact |
@@ -459,11 +459,11 @@ plugins/MauticSyncDataBundle/
 | id | INT (PK, AI) | Primary key |
 | email | VARCHAR(255) | Suppressed email address |
 | suppression_type | VARCHAR(50) | bounce, spam, block, invalid, global_unsub, group_unsub |
-| sendgrid_reason | TEXT | Original reason from SendGrid |
-| sendgrid_status | VARCHAR(50) | Bounce/block status code |
-| sendgrid_created | DATETIME | When SendGrid recorded it |
-| sendgrid_group_id | INT | Unsubscribe group ID (nullable) |
-| sendgrid_group_name | VARCHAR(100) | Unsubscribe group name (nullable) |
+| source_reason | TEXT | Original reason from the provider |
+| source_status | VARCHAR(50) | Bounce/block status code |
+| source_created | DATETIME | When SendGrid recorded it |
+| source_group_id | INT | Unsubscribe group ID (nullable) |
+| source_group_name | VARCHAR(100) | Unsubscribe group name (nullable) |
 | mautic_contact_id | INT | Matched Mautic contact ID (nullable) |
 | dnc_applied | BOOLEAN | Whether DNC was successfully applied |
 | synced_at | DATETIME | When this record was synced |
@@ -475,7 +475,7 @@ plugins/MauticSyncDataBundle/
 - `idx_type` on `suppression_type`
 - `idx_synced` on `synced_at`
 - `idx_contact` on `mautic_contact_id`
-- `UNIQUE idx_email_type` on (`email`, `suppression_type`, `sendgrid_created`)
+- `UNIQUE idx_email_type` on (`email`, `suppression_type`, `source_created`)
 
 ### Settings Storage (No Custom Table)
 
@@ -492,8 +492,8 @@ Only sync-specific runtime state needs custom storage:
 ## 14. Additional Ideas Worth Considering
 
 ### Idea 1: "Clean My List" Action
-- Bulk action in Mautic contact list: "Check against SendGrid"
-- Select contacts → checks each against SendGrid suppression API
+- Bulk action in Mautic contact list: "Check against the provider"
+- Select contacts → checks each against the provider suppression API
 - Shows which are suppressed and offers to DNC them
 
 ### Idea 2: Pre-Send Check
@@ -503,7 +503,7 @@ Only sync-specific runtime state needs custom storage:
 
 ### Idea 3: Suppression Export to Other ESPs
 - Export the aggregated suppression list in formats compatible with other ESPs
-- Useful for users migrating from SendGrid or using multiple ESPs
+- Useful for users migrating from the provider or using multiple ESPs
 
 ### Idea 4: Integration with Mautic's Built-in Reports
 - Add custom report types to Mautic's reporting engine

@@ -178,7 +178,7 @@ var SyncData = (function () {
                 '<td>' + emailCell + '</td>' +
                 '<td><span class="label sd-type-' + item.type + '">' + escapeHtml(item.type_label) + '</span></td>' +
                 '<td class="sd-reason-cell" title="' + escapeHtml(item.reason || '') + '">' + escapeHtml((item.reason || '-').substring(0, 60)) + '</td>' +
-                '<td>' + escapeHtml(item.sendgrid_date) + '</td>' +
+                '<td>' + escapeHtml(item.source_date) + '</td>' +
                 '<td>' + escapeHtml(item.synced_date) + '</td>' +
                 '<td><span class="label label-' + actionClass + '">' + item.action.toUpperCase() + '</span></td>' +
                 '</tr>';

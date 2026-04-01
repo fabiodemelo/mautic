@@ -22,9 +22,9 @@ class NotificationService
         try {
             $mailer = $this->mailHelper;
             $mailer->setTo([$recipientEmail => $recipientEmail]);
-            $mailer->setSubject('[SendGrid Sync] Sync Failed');
+            $mailer->setSubject('[SyncData] Sync Failed');
             $mailer->setBody(
-                '<h2>SendGrid Suppression Sync Failed</h2>'.
+                '<h2>SyncData Failed</h2>'.
                 '<p><strong>Started:</strong> '.$log->getStartedAt()->format('Y-m-d H:i:s').'</p>'.
                 '<p><strong>Type:</strong> '.$log->getSyncType().'</p>'.
                 '<p><strong>Error:</strong> '.htmlspecialchars($log->getErrorMessage() ?? 'Unknown error').'</p>'.
@@ -42,7 +42,7 @@ class NotificationService
             $typeLabel = Suppression::getTypeLabel($type);
             $mailer    = $this->mailHelper;
             $mailer->setTo([$recipientEmail => $recipientEmail]);
-            $mailer->setSubject("[SendGrid Sync] Spike Alert: {$typeLabel}");
+            $mailer->setSubject("[SyncData] Spike Alert: {$typeLabel}");
             $mailer->setBody(
                 '<h2>Suppression Spike Detected</h2>'.
                 "<p>A spike in <strong>{$typeLabel}</strong> suppressions was detected.</p>".

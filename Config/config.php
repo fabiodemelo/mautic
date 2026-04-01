@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 return [
-    'name'        => 'SendGrid Suppression Sync',
-    'description' => 'Sync SendGrid suppressions to Mautic Do Not Contact list or segments.',
+    'name'        => 'SyncData',
+    'description' => 'Sync suppressions to Mautic Do Not Contact list or segments.',
     'version'     => '1.0.0',
     'author'      => 'Fabio de Melo',
 
@@ -97,7 +97,7 @@ return [
         ],
         'others' => [
             'mautic.syncdata.service.api_client' => [
-                'class'     => \MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient::class,
+                'class'     => \MauticPlugin\MauticSyncDataBundle\Service\SyncDataApiClient::class,
                 'arguments' => [
                     'mautic.http.client',
                     'monolog.logger.mautic',

@@ -24,11 +24,11 @@ final class Version20260330002 extends AbstractMigration
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
         $table->addColumn('email', 'string', ['length' => 255]);
         $table->addColumn('suppression_type', 'string', ['length' => 30]);
-        $table->addColumn('sendgrid_reason', 'text', ['notnull' => false]);
-        $table->addColumn('sendgrid_status', 'string', ['length' => 50, 'notnull' => false]);
-        $table->addColumn('sendgrid_created_at', 'datetime');
-        $table->addColumn('sendgrid_group_id', 'integer', ['notnull' => false]);
-        $table->addColumn('sendgrid_group_name', 'string', ['length' => 100, 'notnull' => false]);
+        $table->addColumn('source_reason', 'text', ['notnull' => false]);
+        $table->addColumn('source_status', 'string', ['length' => 50, 'notnull' => false]);
+        $table->addColumn('source_created_at', 'datetime');
+        $table->addColumn('source_group_id', 'integer', ['notnull' => false]);
+        $table->addColumn('source_group_name', 'string', ['length' => 100, 'notnull' => false]);
         $table->addColumn('mautic_contact_id', 'integer', ['notnull' => false]);
         $table->addColumn('action_taken', 'string', ['length' => 20, 'default' => 'unmatched']);
         $table->addColumn('synced_at', 'datetime');
@@ -39,7 +39,7 @@ final class Version20260330002 extends AbstractMigration
         $table->addIndex(['suppression_type'], 'idx_sd_type');
         $table->addIndex(['synced_at'], 'idx_sd_synced_at');
         $table->addIndex(['mautic_contact_id'], 'idx_sd_contact');
-        $table->addUniqueIndex(['email', 'suppression_type', 'sendgrid_created_at'], 'uniq_sd_email_type_date');
+        $table->addUniqueIndex(['email', 'suppression_type', 'source_created_at'], 'uniq_sd_email_type_date');
     }
 
     public function down(Schema $schema): void

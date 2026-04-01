@@ -143,7 +143,7 @@
                                     <th>{{ 'mautic.syncdata.table.email'|trans }}</th>
                                     <th>{{ 'mautic.syncdata.table.type'|trans }}</th>
                                     <th>{{ 'mautic.syncdata.table.reason'|trans }}</th>
-                                    <th>{{ 'mautic.syncdata.table.sendgrid_date'|trans }}</th>
+                                    <th>{{ 'mautic.syncdata.table.source_date'|trans }}</th>
                                     <th>{{ 'mautic.syncdata.table.synced_date'|trans }}</th>
                                     <th>{{ 'mautic.syncdata.table.action'|trans }}</th>
                                 </tr>
@@ -160,7 +160,7 @@
                                     </td>
                                     <td><span class="label sd-type-{{ item.type }}">{{ item.type_label }}</span></td>
                                     <td class="sd-reason-cell" title="{{ item.reason }}">{{ item.reason|default('-')|truncate(60) }}</td>
-                                    <td>{{ item.sendgrid_date }}</td>
+                                    <td>{{ item.source_date }}</td>
                                     <td>{{ item.synced_date }}</td>
                                     <td><span class="label label-{{ item.action == 'dnc' ? 'danger' : (item.action == 'segment' ? 'info' : 'default') }}">{{ item.action|upper }}</span></td>
                                 </tr>

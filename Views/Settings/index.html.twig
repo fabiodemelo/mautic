@@ -166,7 +166,7 @@ function testConnection() {
         btn.disabled = false;
         btn.innerHTML = '<i class="ri-link"></i> Test Connection';
         if (data.success) {
-            resultDiv.innerHTML = '<div class="alert alert-success"><i class="ri-check-line"></i> Connected to SendGrid (' + (data.account || '') + ')</div>';
+            resultDiv.innerHTML = '<div class="alert alert-success"><i class="ri-check-line"></i> Connected successfully (' + (data.account || '') + ')</div>';
         } else {
             resultDiv.innerHTML = '<div class="alert alert-danger"><i class="ri-error-warning-line"></i> ' + (data.error || 'Connection failed') + '</div>';
         }

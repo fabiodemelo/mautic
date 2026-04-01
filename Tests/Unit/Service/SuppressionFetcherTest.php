@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MauticPlugin\MauticSyncDataBundle\Tests\Unit\Service;
 
 use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
-use MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient;
+use MauticPlugin\MauticSyncDataBundle\Service\SyncDataApiClient;
 use MauticPlugin\MauticSyncDataBundle\Service\SuppressionFetcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -13,12 +13,12 @@ use Psr\Log\NullLogger;
 
 class SuppressionFetcherTest extends TestCase
 {
-    private SendGridApiClient|MockObject $apiClient;
+    private SyncDataApiClient|MockObject $apiClient;
     private SuppressionFetcher $fetcher;
 
     protected function setUp(): void
     {
-        $this->apiClient = $this->createMock(SendGridApiClient::class);
+        $this->apiClient = $this->createMock(SyncDataApiClient::class);
         $this->fetcher   = new SuppressionFetcher($this->apiClient, new NullLogger());
     }
 

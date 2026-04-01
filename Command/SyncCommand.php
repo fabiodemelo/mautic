@@ -7,7 +7,7 @@ namespace MauticPlugin\MauticSyncDataBundle\Command;
 use Mautic\IntegrationsBundle\Helper\IntegrationsHelper;
 use MauticPlugin\MauticSyncDataBundle\Entity\SyncLog;
 use MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration;
-use MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient;
+use MauticPlugin\MauticSyncDataBundle\Service\SyncDataApiClient;
 use MauticPlugin\MauticSyncDataBundle\Service\SyncEngine;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,7 +29,7 @@ class SyncCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Sync SendGrid suppressions to Mautic DNC or segments')
+            ->setDescription('Sync suppressions to Mautic DNC or segments')
             ->addOption('type', null, InputOption::VALUE_OPTIONAL, 'Sync type: incremental or full', 'incremental')
             ->addOption('suppression', null, InputOption::VALUE_OPTIONAL, 'Specific suppression type to sync')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Show what would be synced without making changes');
@@ -42,7 +42,7 @@ class SyncCommand extends Command
         try {
             $integration = $this->integrationsHelper->getIntegration(SyncDataIntegration::NAME);
         } catch (\Throwable $e) {
-            $io->error('SendGrid Sync integration is not configured or not enabled.');
+            $io->error('SyncData integration is not configured or not enabled.');
 
             return Command::FAILURE;
         }
@@ -53,7 +53,7 @@ class SyncCommand extends Command
 
         $apiKey = $apiKeys['api_key'] ?? '';
         if ('' === $apiKey) {
-            $io->error('SendGrid API key is not configured. Go to Settings > Plugins > SendGrid Sync.');
+            $io->error('SyncData API key is not configured. Go to Settings > Plugins > SyncData.');
 
             return Command::FAILURE;
         }
@@ -73,7 +73,7 @@ class SyncCommand extends Command
             default  => SyncLog::TYPE_INCREMENTAL,
         };
 
-        $io->title('SendGrid Suppression Sync');
+        $io->title('SyncData');
         $io->text([
             "Sync type: {$syncType}",
             'Dry run: '.($dryRun ? 'Yes' : 'No'),
@@ -111,7 +111,7 @@ class SyncCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function getApiClient(): ?SendGridApiClient
+    private function getApiClient(): ?SyncDataApiClient
     {
         // Access the API client through reflection to set the key
         // This is resolved via the service container in the actual runtime

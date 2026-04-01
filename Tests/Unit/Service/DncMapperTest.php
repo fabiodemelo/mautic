@@ -56,24 +56,24 @@ class DncMapperTest extends TestCase
     public function testBuildCommentWithAllParts(): void
     {
         $comment = $this->mapper->buildComment(Suppression::TYPE_BOUNCE, '550 User unknown', '5.1.1');
-        $this->assertSame('[SendGrid Sync] Bounce: 5.1.1: 550 User unknown', $comment);
+        $this->assertSame('[SyncData] Bounce: 5.1.1: 550 User unknown', $comment);
     }
 
     public function testBuildCommentWithReasonOnly(): void
     {
         $comment = $this->mapper->buildComment(Suppression::TYPE_SPAM_REPORT, 'User reported spam', null);
-        $this->assertSame('[SendGrid Sync] Spam Report: User reported spam', $comment);
+        $this->assertSame('[SyncData] Spam Report: User reported spam', $comment);
     }
 
     public function testBuildCommentWithStatusOnly(): void
     {
         $comment = $this->mapper->buildComment(Suppression::TYPE_BLOCK, null, '4.0.0');
-        $this->assertSame('[SendGrid Sync] Block: 4.0.0', $comment);
+        $this->assertSame('[SyncData] Block: 4.0.0', $comment);
     }
 
     public function testBuildCommentWithNoParts(): void
     {
         $comment = $this->mapper->buildComment(Suppression::TYPE_GLOBAL_UNSUBSCRIBE, null, null);
-        $this->assertSame('[SendGrid Sync] Global Unsubscribe', $comment);
+        $this->assertSame('[SyncData] Global Unsubscribe', $comment);
     }
 }

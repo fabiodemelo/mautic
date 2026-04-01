@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['suppression_type'], name: 'idx_sd_type')]
 #[ORM\Index(columns: ['synced_at'], name: 'idx_sd_synced_at')]
 #[ORM\Index(columns: ['mautic_contact_id'], name: 'idx_sd_contact')]
-#[ORM\UniqueConstraint(name: 'uniq_sd_email_type_date', columns: ['email', 'suppression_type', 'sendgrid_created_at'])]
+#[ORM\UniqueConstraint(name: 'uniq_sd_email_type_date', columns: ['email', 'suppression_type', 'source_created_at'])]
 class Suppression
 {
     public const TYPE_BOUNCE             = 'bounce';
@@ -47,20 +47,20 @@ class Suppression
     #[ORM\Column(name: 'suppression_type', type: Types::STRING, length: 30)]
     private string $suppressionType;
 
-    #[ORM\Column(name: 'sendgrid_reason', type: Types::TEXT, nullable: true)]
-    private ?string $sendgridReason = null;
+    #[ORM\Column(name: 'source_reason', type: Types::TEXT, nullable: true)]
+    private ?string $sourceReason = null;
 
-    #[ORM\Column(name: 'sendgrid_status', type: Types::STRING, length: 50, nullable: true)]
-    private ?string $sendgridStatus = null;
+    #[ORM\Column(name: 'source_status', type: Types::STRING, length: 50, nullable: true)]
+    private ?string $sourceStatus = null;
 
-    #[ORM\Column(name: 'sendgrid_created_at', type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $sendgridCreatedAt;
+    #[ORM\Column(name: 'source_created_at', type: Types::DATETIME_MUTABLE)]
+    private \DateTimeInterface $sourceCreatedAt;
 
-    #[ORM\Column(name: 'sendgrid_group_id', type: Types::INTEGER, nullable: true)]
-    private ?int $sendgridGroupId = null;
+    #[ORM\Column(name: 'source_group_id', type: Types::INTEGER, nullable: true)]
+    private ?int $sourceGroupId = null;
 
-    #[ORM\Column(name: 'sendgrid_group_name', type: Types::STRING, length: 100, nullable: true)]
-    private ?string $sendgridGroupName = null;
+    #[ORM\Column(name: 'source_group_name', type: Types::STRING, length: 100, nullable: true)]
+    private ?string $sourceGroupName = null;
 
     #[ORM\Column(name: 'mautic_contact_id', type: Types::INTEGER, nullable: true)]
     private ?int $mauticContactId = null;
@@ -109,62 +109,62 @@ class Suppression
         return $this;
     }
 
-    public function getSendgridReason(): ?string
+    public function getSourceReason(): ?string
     {
-        return $this->sendgridReason;
+        return $this->sourceReason;
     }
 
-    public function setSendgridReason(?string $sendgridReason): self
+    public function setSourceReason(?string $sourceReason): self
     {
-        $this->sendgridReason = $sendgridReason;
+        $this->sourceReason = $sourceReason;
 
         return $this;
     }
 
-    public function getSendgridStatus(): ?string
+    public function getSourceStatus(): ?string
     {
-        return $this->sendgridStatus;
+        return $this->sourceStatus;
     }
 
-    public function setSendgridStatus(?string $sendgridStatus): self
+    public function setSourceStatus(?string $sourceStatus): self
     {
-        $this->sendgridStatus = $sendgridStatus;
+        $this->sourceStatus = $sourceStatus;
 
         return $this;
     }
 
-    public function getSendgridCreatedAt(): \DateTimeInterface
+    public function getSourceCreatedAt(): \DateTimeInterface
     {
-        return $this->sendgridCreatedAt;
+        return $this->sourceCreatedAt;
     }
 
-    public function setSendgridCreatedAt(\DateTimeInterface $sendgridCreatedAt): self
+    public function setSourceCreatedAt(\DateTimeInterface $sourceCreatedAt): self
     {
-        $this->sendgridCreatedAt = $sendgridCreatedAt;
+        $this->sourceCreatedAt = $sourceCreatedAt;
 
         return $this;
     }
 
-    public function getSendgridGroupId(): ?int
+    public function getSourceGroupId(): ?int
     {
-        return $this->sendgridGroupId;
+        return $this->sourceGroupId;
     }
 
-    public function setSendgridGroupId(?int $sendgridGroupId): self
+    public function setSourceGroupId(?int $sourceGroupId): self
     {
-        $this->sendgridGroupId = $sendgridGroupId;
+        $this->sourceGroupId = $sourceGroupId;
 
         return $this;
     }
 
-    public function getSendgridGroupName(): ?string
+    public function getSourceGroupName(): ?string
     {
-        return $this->sendgridGroupName;
+        return $this->sourceGroupName;
     }
 
-    public function setSendgridGroupName(?string $sendgridGroupName): self
+    public function setSourceGroupName(?string $sourceGroupName): self
     {
-        $this->sendgridGroupName = $sendgridGroupName;
+        $this->sourceGroupName = $sourceGroupName;
 
         return $this;
     }

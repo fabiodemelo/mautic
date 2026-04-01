@@ -26,7 +26,7 @@ class DncMapper
     public function buildComment(string $type, ?string $reason, ?string $status): string
     {
         $label = Suppression::getTypeLabel($type);
-        $parts = ["[SendGrid Sync] {$label}"];
+        $parts = ["[SyncData] {$label}"];
 
         if (null !== $status && '' !== $status) {
             $parts[] = $status;

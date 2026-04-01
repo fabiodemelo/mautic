@@ -54,7 +54,7 @@ class SyncEngine
 
             $startTime = $this->resolveStartTime($syncType, $settings);
 
-            $this->logger->info('Starting SendGrid sync', [
+            $this->logger->info('Starting SyncData sync', [
                 'type'         => $syncType,
                 'enabledTypes' => $enabledTypes,
                 'startTime'    => $startTime,
@@ -90,7 +90,7 @@ class SyncEngine
                     $email = $record['email'];
 
                     $suppressionRepo = $this->getSuppressionRepository();
-                    if ($suppressionRepo->existsBySendgridKey($email, $type, $record['created_at'])) {
+                    if ($suppressionRepo->existsBySourceKey($email, $type, $record['created_at'])) {
                         ++$totalSkipped;
                         continue;
                     }
@@ -101,11 +101,11 @@ class SyncEngine
                     $suppression = new Suppression();
                     $suppression->setEmail($email);
                     $suppression->setSuppressionType($type);
-                    $suppression->setSendgridReason($record['reason']);
-                    $suppression->setSendgridStatus($record['status']);
-                    $suppression->setSendgridCreatedAt($record['created_at']);
-                    $suppression->setSendgridGroupId($record['group_id']);
-                    $suppression->setSendgridGroupName($record['group_name']);
+                    $suppression->setSourceReason($record['reason']);
+                    $suppression->setSourceStatus($record['status']);
+                    $suppression->setSourceCreatedAt($record['created_at']);
+                    $suppression->setSourceGroupId($record['group_id']);
+                    $suppression->setSourceGroupName($record['group_name']);
                     $suppression->setMauticContactId($contactId);
 
                     if (null === $contact) {
@@ -152,7 +152,7 @@ class SyncEngine
             $this->entityManager->persist($syncLog);
             $this->entityManager->flush();
 
-            $this->logger->info('SendGrid sync completed', [
+            $this->logger->info('SyncData sync completed', [
                 'fetched'   => $totalFetched,
                 'added'     => $totalAdded,
                 'skipped'   => $totalSkipped,
@@ -162,7 +162,7 @@ class SyncEngine
             $this->checkForSpike($breakdown, $settings);
 
         } catch (\Throwable $e) {
-            $this->logger->error('SendGrid sync failed', ['error' => $e->getMessage()]);
+            $this->logger->error('SyncData sync failed', ['error' => $e->getMessage()]);
 
             $syncLog->markFailed($e->getMessage());
             $this->entityManager->persist($syncLog);

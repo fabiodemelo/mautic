@@ -44,7 +44,7 @@ class SyncEngineTest extends TestCase
         $suppressionRepo   = $this->createMock(SuppressionRepository::class);
 
         $syncLogRepo->method('getLastSyncTimestamp')->willReturn(0);
-        $suppressionRepo->method('existsBySendgridKey')->willReturn(false);
+        $suppressionRepo->method('existsBySourceKey')->willReturn(false);
 
         $this->em->method('getRepository')
             ->willReturnMap([

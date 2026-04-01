@@ -126,7 +126,7 @@ class DashboardController extends AbstractFormController
 
         $response = new StreamedResponse(function () use ($filters) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['Email', 'Type', 'Reason', 'Status', 'SendGrid Date', 'Synced Date', 'Action', 'Contact ID']);
+            fputcsv($handle, ['Email', 'Type', 'Reason', 'Status', 'Source Date', 'Synced Date', 'Action', 'Contact ID']);
 
             $page = 1;
             do {
@@ -137,7 +137,7 @@ class DashboardController extends AbstractFormController
                         $item['type_label'],
                         $item['reason'] ?? '',
                         $item['status'] ?? '',
-                        $item['sendgrid_date'],
+                        $item['source_date'],
                         $item['synced_date'],
                         $item['action'],
                         $item['contact_id'] ?? '',

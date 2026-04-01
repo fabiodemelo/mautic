@@ -8,7 +8,7 @@ use Mautic\CoreBundle\Controller\AbstractFormController;
 use Mautic\IntegrationsBundle\Helper\IntegrationsHelper;
 use MauticPlugin\MauticSyncDataBundle\Entity\SyncLog;
 use MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration;
-use MauticPlugin\MauticSyncDataBundle\Service\SendGridApiClient;
+use MauticPlugin\MauticSyncDataBundle\Service\SyncDataApiClient;
 use MauticPlugin\MauticSyncDataBundle\Service\SyncEngine;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -17,7 +17,7 @@ class SyncController extends AbstractFormController
     public function __construct(
         private readonly SyncEngine $syncEngine,
         private readonly IntegrationsHelper $integrationsHelper,
-        private readonly SendGridApiClient $apiClient,
+        private readonly SyncDataApiClient $apiClient,
     ) {
     }
 
@@ -37,7 +37,7 @@ class SyncController extends AbstractFormController
             if ('' === $apiKey) {
                 return new JsonResponse([
                     'success' => false,
-                    'error'   => 'SendGrid API key is not configured.',
+                    'error'   => 'SyncData API key is not configured.',
                 ]);
             }
 

@@ -18,7 +18,7 @@ class SyncDataIntegration extends BasicIntegration implements BasicInterface, Co
     use DefaultConfigFormTrait;
 
     public const NAME         = 'SyncData';
-    public const DISPLAY_NAME = 'SendGrid Suppression Sync';
+    public const DISPLAY_NAME = 'SyncData';
 
     public function getName(): string
     {

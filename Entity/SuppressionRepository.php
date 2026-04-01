@@ -125,16 +125,16 @@ class SuppressionRepository extends ServiceEntityRepository
         ];
     }
 
-    public function existsBySendgridKey(string $email, string $type, \DateTimeInterface $sendgridCreatedAt): bool
+    public function existsBySourceKey(string $email, string $type, \DateTimeInterface $sourceCreatedAt): bool
     {
         $count = (int) $this->createQueryBuilder('s')
             ->select('COUNT(s.id)')
             ->where('s.email = :email')
             ->andWhere('s.suppressionType = :type')
-            ->andWhere('s.sendgridCreatedAt = :createdAt')
+            ->andWhere('s.sourceCreatedAt = :createdAt')
             ->setParameter('email', strtolower(trim($email)))
             ->setParameter('type', $type)
-            ->setParameter('createdAt', $sendgridCreatedAt)
+            ->setParameter('createdAt', $sourceCreatedAt)
             ->getQuery()
             ->getSingleScalarResult();
 

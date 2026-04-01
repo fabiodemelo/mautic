@@ -1,6 +1,6 @@
 # MauticSyncData Plugin
 
-**Sync SendGrid suppressions (bounces, spam reports, blocks, invalid emails, unsubscribes) to Mautic's Do Not Contact list or segments — automatically.**
+**Sync suppressions (bounces, spam reports, blocks, invalid emails, unsubscribes) to Mautic's Do Not Contact list or segments — automatically.**
 
 Protect your sender reputation by ensuring Mautic never sends to addresses that SendGrid has already suppressed.
 
@@ -26,7 +26,7 @@ Protect your sender reputation by ensuring Mautic never sends to addresses that 
 |-------------|---------|
 | Mautic | >= 5.0 |
 | PHP | >= 8.1 |
-| SendGrid API Key | v3 with **Suppressions Read** permission |
+| SyncData API Key | v3 with **Suppressions Read** permission |
 
 ---
 
@@ -51,7 +51,7 @@ Protect your sender reputation by ensuring Mautic never sends to addresses that 
 
    > **Important:** Always run `cache:clear` and `mautic:plugins:reload` from the **Mautic root directory** (where `bin/console` lives), not from inside the plugins folder.
 
-3. **Verify** the plugin appears in **Settings > Plugins > SendGrid Suppression Sync**.
+3. **Verify** the plugin appears in **Settings > Plugins > SyncData**.
 
 ### Option 2: Composer (when published to Packagist)
 
@@ -66,14 +66,14 @@ php bin/console mautic:plugins:reload
 
 ## Configuration
 
-### 1. Add Your SendGrid API Key
+### 1. Add Your SyncData API Key
 
-1. Navigate to **SendGrid Sync > Settings** in the Mautic admin sidebar
-2. Enter your SendGrid API Key (requires `Suppressions Read` scope)
+1. Navigate to **SyncData > Settings** in the Mautic admin sidebar
+2. Enter your SyncData API Key (requires `Suppressions Read` scope)
 3. Click **Test Connection** to verify
 4. Click **Save Settings**
 
-> **How to create a SendGrid API key:**
+> **How to create a SyncData API key:**
 > Go to [SendGrid > Settings > API Keys](https://app.sendgrid.com/settings/api_keys) → Create API Key → Select "Restricted Access" → Enable **Suppressions > Read** → Create & Copy.
 
 ### 2. Configure Suppression Types
@@ -87,7 +87,7 @@ For each of the 6 suppression types, you can:
 
 | Suppression Type | Default DNC Reason | Use Case |
 |-----------------|-------------------|----------|
-| Bounce | Bounced | Hard/soft bounces from SendGrid |
+| Bounce | Bounced | Hard/soft bounces from the provider |
 | Spam Report | Unsubscribed | Recipients who reported spam |
 | Block | Manual | Temporarily blocked sends |
 | Invalid Email | Bounced | Invalid email addresses |
@@ -121,7 +121,7 @@ Add this to your server's crontab:
 
 ### Dashboard
 
-Navigate to **SendGrid Sync > Dashboard** to see:
+Navigate to **SyncData > Dashboard** to see:
 
 - **Summary cards**: Total synced, new suppressions (24h/7d/30d), contacts protected, last sync status
 - **Breakdown chart**: Donut chart showing suppression distribution by type
@@ -210,7 +210,7 @@ plugins/MauticSyncDataBundle/
 
 ```
 SyncCommand → SyncEngine
-                ├── SuppressionFetcher → SendGridApiClient
+                ├── SuppressionFetcher → SyncDataApiClient
                 ├── ContactResolver → LeadModel
                 ├── DncMapper
                 ├── DoNotContactModel (Mautic)
@@ -222,8 +222,8 @@ SyncCommand → SyncEngine
 
 ## Troubleshooting
 
-### "SendGrid API key is not configured"
-Go to **SendGrid Sync > Settings**, enter your API key, and click **Save**.
+### "SyncData API key is not configured"
+Go to **SyncData > Settings**, enter your API key, and click **Save**.
 
 ### "Connection failed: 403 Forbidden"
 Your API key doesn't have the required permissions. Create a new key with **Suppressions Read** access.

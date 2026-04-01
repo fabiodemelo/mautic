@@ -12,7 +12,7 @@ class SuppressionFetcher
     private const PAGE_LIMIT = 500;
 
     public function __construct(
-        private readonly SendGridApiClient $apiClient,
+        private readonly SyncDataApiClient $apiClient,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -56,7 +56,7 @@ class SuppressionFetcher
     }
 
     /**
-     * Normalize a raw SendGrid suppression record to a common structure.
+     * Normalize a raw suppression record to a common structure.
      */
     private function normalize(string $type, array $raw): array
     {
