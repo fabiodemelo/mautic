@@ -53,7 +53,7 @@
             <div class="sd-card sd-card-{% if stats.last_sync.status == 'success' %}success{% elseif stats.last_sync.status == 'failed' %}danger{% else %}default{% endif %}">
                 <div class="sd-card-icon"><i class="ri-time-line"></i></div>
                 <div class="sd-card-body">
-                    <div class="sd-card-value" id="sd-lastsync">
+                    <div class="sd-card-value sd-card-value-date" id="sd-lastsync">
                         {% if stats.last_sync.time %}
                             {{ stats.last_sync.time }}
                         {% else %}
