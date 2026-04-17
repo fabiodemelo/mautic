@@ -19,9 +19,16 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="control-label" for="sd-api-key">{{ 'mautic.syncdata.settings.api_key'|trans }}</label>
+                            {% if hasApiKey %}
+                                <div class="sd-key-preview">
+                                    <i class="ri-checkbox-circle-fill text-success"></i>
+                                    <span class="sd-key-status">{{ 'mautic.syncdata.settings.api_key.saved'|trans }}</span>
+                                    <code class="sd-key-mask">{{ apiKeyPreview }}</code>
+                                </div>
+                            {% endif %}
                             <div class="input-group">
                                 <input type="password" id="sd-api-key" name="api_key" class="form-control"
-                                       placeholder="{{ hasApiKey ? '••••••••••••••••' : 'SG.xxxxxxxxxx' }}"
+                                       placeholder="{{ hasApiKey ? 'Paste a new key to replace it…' : 'SG.xxxxxxxxxx' }}"
                                        autocomplete="off">
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-default" id="sd-test-btn" onclick="testConnection()">

@@ -275,3 +275,33 @@
     opacity: 0.7;
     cursor: not-allowed;
 }
+
+/* API key preview */
+.sd-key-preview {
+    background: #f1f8f4;
+    border: 1px solid #c8e6c9;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+.sd-key-preview .text-success { color: #2e7d32; font-size: 16px; }
+.sd-key-status   { color: #2e7d32; font-weight: 500; }
+.sd-key-mask     {
+    background: rgba(255,255,255,0.7);
+    border: 1px dashed #c8e6c9;
+    border-radius: 4px;
+    padding: 2px 8px;
+    color: #455a64;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}

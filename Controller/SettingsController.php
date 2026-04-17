@@ -24,15 +24,18 @@ class SettingsController extends CommonController
             return $this->accessDenied();
         }
 
-        $settings  = $this->getSettings($integrationsHelper);
-        $apiKeys   = $this->getApiKeys($integrationsHelper);
-        $hasApiKey = !empty($apiKeys['api_key']);
-        $segments  = $this->getSegmentChoices($listModel);
+        $settings       = $this->getSettings($integrationsHelper);
+        $apiKeys        = $this->getApiKeys($integrationsHelper);
+        $rawApiKey      = $apiKeys['api_key'] ?? null;
+        $hasApiKey      = is_string($rawApiKey) && '' !== $rawApiKey;
+        $apiKeyPreview  = $hasApiKey ? $this->maskApiKey($rawApiKey) : '';
+        $segments       = $this->getSegmentChoices($listModel);
 
         return $this->delegateView([
             'viewParameters' => [
                 'settings'        => $settings,
                 'hasApiKey'       => $hasApiKey,
+                'apiKeyPreview'   => $apiKeyPreview,
                 'types'           => Suppression::ALL_TYPES,
                 'segments'        => $segments,
                 'intervalChoices' => [
@@ -131,6 +134,16 @@ class SettingsController extends CommonController
         $result = $apiClient->testConnection();
 
         return new JsonResponse($result);
+    }
+
+    private function maskApiKey(string $key): string
+    {
+        $visible = 10;
+        if (strlen($key) <= $visible) {
+            return $key;
+        }
+
+        return substr($key, 0, $visible).str_repeat('•', max(0, strlen($key) - $visible));
     }
 
     private function getSettings(IntegrationsHelper $integrationsHelper): array
