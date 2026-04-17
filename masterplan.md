@@ -1,9 +1,11 @@
-# MauticSyncData Plugin — Product Masterplan
+# SyncData for Mautic — Product Masterplan
+
+> **Status:** Released — v2.0.0 · **Support:** support@demelos.com
 
 ## 1. Product Overview
 
-**Plugin Name:** MauticSyncData (Mautic SyncData)
-**Tagline:** "Protect your sender reputation — automatically sync suppressions to Mautic's Do Not Contact list."
+**Plugin Name:** SyncData (bundle: `MauticSyncDataBundle`)
+**Tagline:** "Protect your sender reputation — automatically sync SendGrid suppressions to Mautic's Do Not Contact list."
 
 ### The Problem
 When using Mautic with SendGrid as the email transport, SendGrid maintains its own suppression lists (bounces, spam reports, blocks, invalid emails, unsubscribes). But Mautic doesn't know about them. This means:

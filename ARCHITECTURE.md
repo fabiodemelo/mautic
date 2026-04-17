@@ -1,12 +1,15 @@
-# MauticSyncData — Technical Architecture Plan
+# SyncData — Technical Architecture (v2.0)
 
 ## 1. Architecture Overview
 
 A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC system (or designated segments), with a dashboard for analytics and a cron command for automated sync.
 
-**Namespace:** `MauticPlugin\MauticSyncDataBundle`
-**Directory:** `plugins/MauticSyncDataBundle/`
-**Compatibility:** Mautic >=5.0, PHP >=8.1, Symfony 6.x
+- **Display name:** SyncData
+- **Namespace:** `MauticPlugin\MauticSyncDataBundle`
+- **Directory:** `plugins/MauticSyncDataBundle/`
+- **Compatibility:** Mautic >=5.0, PHP >=8.1, Symfony 6.x
+- **Version:** 2.0.0
+- **Support:** support@demelos.com
 
 ---
 
@@ -16,10 +19,11 @@ A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC 
 |-------|-----------|
 | Platform | Mautic >=5.0 (Symfony 6.x) |
 | Language | PHP >=8.1 |
-| Plugin Framework | IntegrationsBundle |
-| Templates | Twig (extends `MauticCoreBundle:Default:content.html.twig`) |
+| Plugin Framework | IntegrationsBundle (BasicIntegration + ConfigForm interfaces) |
+| Templates | Twig (extends `@MauticCore/Default/content.html.twig`) |
 | Charts | Chart.js 2.9.4 (native, bundled with Mautic) |
-| HTTP Client | Symfony HttpClient |
+| HTTP Client | GuzzleHttp\Client (`mautic.http.client`) |
+| Encryption | `Mautic\IntegrationsBundle\Facade\EncryptionService` for API keys |
 | ORM | Doctrine (MySQL/MariaDB) |
 | Background Jobs | Cron-based console command |
 | Testing | PHPUnit |
@@ -85,17 +89,21 @@ A Mautic 5.x plugin that syncs SendGrid's 7 suppression types into Mautic's DNC 
 
 ### 3.3 Settings Storage (No Custom Table)
 
+All configuration lives in Mautic's `plugin_integration_settings` table via the `IntegrationsBundle` Integration entity. API keys are encrypted/decrypted via `EncryptionService`.
+
 | Setting | Storage | Method |
 |---------|---------|--------|
-| API Key | IntegrationsBundle API keys | `getApiKeys()['api_key']` |
+| API Key (encrypted) | IntegrationsBundle API keys | `getApiKeys()['api_key']` (auto-decrypted by IntegrationsHelper on read) |
 | Enabled suppression types | Feature settings | `getFeatureSettings()['enabled_types']` |
 | Sync interval (minutes) | Feature settings | `getFeatureSettings()['sync_interval']` |
-| Initial sync range (days) | Feature settings | `getFeatureSettings()['initial_sync_range']` |
+| Initial sync range (days, 0 = all) | Feature settings | `getFeatureSettings()['initial_sync_range']` |
+| Max records per sync (0 = unlimited) | Feature settings | `getFeatureSettings()['max_per_sync']` |
+| Default action mode (dnc / segment) | Feature settings | `getFeatureSettings()['default_action_mode']` |
 | Suppression action mode (per type) | Feature settings | `getFeatureSettings()['action_modes']` |
 | Target segment ID (per type) | Feature settings | `getFeatureSettings()['target_segments']` |
 | Notification email | Feature settings | `getFeatureSettings()['notification_email']` |
 | Spike threshold | Feature settings | `getFeatureSettings()['spike_threshold']` |
-| Last sync timestamp (per type) | Derived | Query latest `SyncLog` with `status=success` |
+| Last sync timestamp | Derived | Latest `SyncLog` with `status=success` |
 
 ---
 
@@ -107,27 +115,27 @@ All routes require authentication (Mautic admin session).
 
 | Method | Route | Controller | Permission | Description |
 |--------|-------|------------|------------|-------------|
-| GET | `/s/plugins/syncdata/dashboard` | `DashboardController::indexAction` | `syncdata:view` | Main dashboard page |
-| GET | `/s/plugins/syncdata/dashboard/stats` | `DashboardController::statsAction` | `syncdata:view` | AJAX: summary card data |
-| GET | `/s/plugins/syncdata/dashboard/chart/{type}` | `DashboardController::chartDataAction` | `syncdata:view` | AJAX: chart data (breakdown/trend) |
-| GET | `/s/plugins/syncdata/dashboard/suppressions` | `DashboardController::suppressionsAction` | `syncdata:view` | AJAX: paginated suppressions table |
-| GET | `/s/plugins/syncdata/dashboard/history` | `DashboardController::historyAction` | `syncdata:view` | AJAX: sync history log |
-| GET | `/s/plugins/syncdata/dashboard/export` | `DashboardController::exportAction` | `syncdata:manage` | CSV export of suppressions |
+| GET | `/s/plugins/syncdata/dashboard` | `DashboardController::indexAction` | `plugin:syncdata:dashboard:view` | Main dashboard page |
+| GET | `/s/plugins/syncdata/dashboard/stats` | `DashboardController::statsAction` | `plugin:syncdata:dashboard:view` | AJAX: summary card data |
+| GET | `/s/plugins/syncdata/dashboard/chart/{type}` | `DashboardController::chartDataAction` | `plugin:syncdata:dashboard:view` | AJAX: chart data (breakdown/trend) |
+| GET | `/s/plugins/syncdata/dashboard/suppressions` | `DashboardController::suppressionsAction` | `plugin:syncdata:dashboard:view` | AJAX: paginated suppressions table |
+| GET | `/s/plugins/syncdata/dashboard/history` | `DashboardController::historyAction` | `plugin:syncdata:dashboard:view` | AJAX: sync history log |
+| GET | `/s/plugins/syncdata/dashboard/export` | `DashboardController::exportAction` | `plugin:syncdata:settings:edit` | CSV export of suppressions |
 
 ### 4.2 Sync
 
 | Method | Route | Controller | Permission | Description |
 |--------|-------|------------|------------|-------------|
-| POST | `/s/plugins/syncdata/sync/run` | `SyncController::runAction` | `syncdata:manage` | Trigger manual sync (AJAX) |
-| GET | `/s/plugins/syncdata/sync/status/{logId}` | `SyncController::statusAction` | `syncdata:view` | Check sync progress (AJAX) |
+| POST | `/s/plugins/syncdata/sync/run` | `SyncController::runAction` | `plugin:syncdata:settings:edit` | Trigger manual sync (AJAX) |
+| GET | `/s/plugins/syncdata/sync/status/{logId}` | `SyncController::statusAction` | `plugin:syncdata:dashboard:view` | Check sync progress (AJAX) |
 
 ### 4.3 Settings
 
 | Method | Route | Controller | Permission | Description |
 |--------|-------|------------|------------|-------------|
-| GET | `/s/plugins/syncdata/settings` | `SettingsController::indexAction` | `syncdata:manage` | Settings page |
-| POST | `/s/plugins/syncdata/settings/save` | `SettingsController::saveAction` | `syncdata:manage` | Save settings |
-| POST | `/s/plugins/syncdata/settings/test` | `SettingsController::testConnectionAction` | `syncdata:manage` | Test SyncData API connection (AJAX) |
+| GET | `/s/plugins/syncdata/settings` | `SettingsController::indexAction` | `plugin:syncdata:settings:edit` | Settings page |
+| POST | `/s/plugins/syncdata/settings/save` | `SettingsController::saveAction` | `plugin:syncdata:settings:edit` | Save settings |
+| POST | `/s/plugins/syncdata/settings/test` | `SettingsController::testConnectionAction` | `plugin:syncdata:settings:edit` | Test SendGrid API connection (AJAX) |
 
 ---
 
@@ -158,13 +166,14 @@ Options:
 
 ### 6.1 `SyncDataApiClient`
 
-HTTP client for SendGrid v3 API.
+HTTP client for SendGrid v3 API. Uses GuzzleHttp\Client (Mautic's `mautic.http.client`). Rate-limit aware — pauses 0.5s when `X-RateLimit-Remaining` drops below 10.
 
 ```php
 class SyncDataApiClient
 {
-    // Dependencies: HttpClientInterface, LoggerInterface
+    // Dependencies: GuzzleHttp\Client, LoggerInterface
 
+    public function setApiKey(string $apiKey): void;          // Injected at runtime by SyncEngine / SettingsController
     public function testConnection(): array;
     // Returns: ['success' => bool, 'account' => string, 'error' => string|null]
 
@@ -282,34 +291,44 @@ Orchestrates the full sync process.
 class SyncEngine
 {
     // Dependencies: SuppressionFetcher, ContactResolver, DncMapper,
-    //               DoNotContact model, SegmentModel, SyncLogRepository,
-    //               SuppressionRepository, LoggerInterface
+    //               DoNotContact (LeadBundle\Model), ListModel,
+    //               EntityManagerInterface, NotificationService, LoggerInterface
 
-    public function sync(string $syncType = 'incremental', ?string $suppressionType = null, bool $dryRun = false): SyncLog;
+    public function sync(
+        string $syncType = SyncLog::TYPE_INCREMENTAL,
+        array $settings = [],
+        ?string $specificType = null,
+        bool $dryRun = false,
+    ): SyncLog;
     // Main entry point. Returns completed SyncLog entity.
     //
     // Flow:
     // 1. Create SyncLog (status=running)
-    // 2. Determine startTime (incremental: last success timestamp, full: 0)
-    // 3. Fetch suppressions via SuppressionFetcher
-    // 4. Batch resolve contacts via ContactResolver
-    // 5. For each suppression:
-    //    a. Check if already in suppressions table (dedup by unique index)
-    //    b. If contact found:
-    //       - Check action_mode config for this type
-    //       - If 'dnc': add to DNC via DoNotContact model
-    //       - If 'segment': add to configured segment via SegmentModel
-    //    c. If contact not found: record as unmatched
+    // 2. relinkUnmatched(): re-check up to 500 prior UNMATCHED rows
+    //    and apply the configured action if their contact now exists
+    // 3. Resolve startTime:
+    //    - full   → -initial_sync_range days (or 0 = all time)
+    //    - incremental → last successful sync timestamp
+    // 4. Fetch suppressions via SuppressionFetcher
+    // 5. Batch resolve contacts via ContactResolver (one IN-query per type)
+    // 6. For each suppression (until max_per_sync cap is hit):
+    //    a. Dedup check via existsBySourceKey()
+    //    b. If contact found and not dry-run:
+    //       - 'segment' mode → add to configured segment
+    //       - 'dnc' mode    → add to DNC with mapped reason and comment
+    //    c. If contact not found → mark as UNMATCHED
     //    d. Persist Suppression entity
-    // 6. Flush in batches of 100
-    // 7. Update SyncLog with counts and status
-    // 8. Return SyncLog
+    // 7. Flush in batches of 100, clearing the entity manager between batches
+    // 8. Update SyncLog with totals, breakdown, status
+    // 9. Spike alert if any type exceeded the threshold
+    // 10. Return SyncLog
 
-    public function getLastSyncTimestamp(string $suppressionType): int;
-    // Queries latest successful SyncLog for this type
+    private function relinkUnmatched(array $settings, bool $dryRun): void;
+    // Picks up to 500 UNMATCHED suppressions, retries contact lookup,
+    // and applies the configured action for any that now match.
 
-    private function processBatch(array $suppressions, array $contactMap, array $actionModes): array;
-    // Returns: ['added' => N, 'skipped' => N, 'unmatched' => N]
+    public function getLastSyncTimestamp(): int;
+    // Returns timestamp of the last successful SyncLog.
 }
 ```
 

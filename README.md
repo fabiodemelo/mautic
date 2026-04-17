@@ -1,22 +1,71 @@
-# MauticSyncData Plugin
+# SyncData for Mautic — v2.0
 
-**Sync suppressions (bounces, spam reports, blocks, invalid emails, unsubscribes) to Mautic's Do Not Contact list or segments — automatically.**
+**Sync every SendGrid suppression — bounces, spam reports, blocks, invalid emails, global unsubscribes, and group unsubscribes — into Mautic's Do Not Contact list (or any segment you choose), automatically and on a schedule.**
 
-Protect your sender reputation by ensuring Mautic never sends to addresses that SendGrid has already suppressed.
+Protect your sender reputation by guaranteeing Mautic never sends to addresses that SendGrid has already suppressed, while keeping every action visible in a real-time dashboard.
+
+> **Support:** [support@demelos.com](mailto:support@demelos.com)
+> **Repository:** https://github.com/fabiodemelo/mautic
+> **License:** GPL-3.0-or-later
+
+---
+
+## What This Plugin Does
+
+When you use SendGrid as your Mautic email transport, SendGrid maintains its **own** suppression lists (bounces, spam reports, blocks, invalid emails, unsubscribes). Mautic doesn't know about them, which means:
+
+- Mautic keeps trying to send to addresses SendGrid has permanently rejected
+- Your sender reputation degrades silently
+- Bounce rates climb and deliverability drops
+- You can't see, in one place, who has been suppressed and why
+
+**SyncData closes the loop.** It pulls every SendGrid suppression on a schedule, matches each address to the corresponding Mautic contact, and either adds them to Mautic's DNC list or moves them to a segment of your choice — with full visibility through a dedicated dashboard.
 
 ---
 
 ## Features
 
-- **All 7 SendGrid suppression types**: Bounces, Spam Reports, Blocks, Invalid Emails, Global Unsubscribes, Group Unsubscribes, and Unsubscribe Group mapping
-- **Flexible action modes**: Per suppression type, choose to add contacts to DNC *or* to a Mautic segment for review
-- **Automated sync**: Cron-based incremental sync with configurable intervals (5min to 24hr)
-- **Rich dashboard**: Summary cards, donut breakdown chart, trend line chart, searchable/filterable suppressions table, sync history log
-- **CSV export**: Export all synced suppressions
-- **Spike detection**: Email alerts when suppression counts exceed a configurable threshold
-- **Dry-run mode**: Preview what would be synced without making changes
-- **Deduplication**: Unique constraint prevents duplicate suppression records
-- **Batch processing**: Memory-efficient processing in batches of 100
+### Sync engine
+- **All 7 SendGrid suppression types** synced in a single run:
+  - Bounces · Spam Reports · Blocks · Invalid Emails · Global Unsubscribes · Group Unsubscribes · Unsubscribe Group mapping
+- **Per-type action mode**: send each type to **DNC** or to a **specific Mautic segment**
+- **Incremental sync**: only fetches suppressions added since the last successful run
+- **Full sync**: optional re-pull of historical data within a configurable window
+- **Configurable initial sync range**: 7 / 30 / 90 days, or **All time**
+- **Max Records Per Sync** cap so first-time imports of huge lists can be processed in chunks
+- **Automatic re-linking**: previously UNMATCHED suppressions get linked the moment the matching contact is created in Mautic
+- **Deduplication** via a unique constraint (email + type + source date) — re-runs are safe
+- **Memory-safe batching** in groups of 100 with automatic Doctrine entity-manager flush + clear
+- **Dry-run mode** to preview what would happen before changing any data
+
+### Dashboard
+- **4 summary cards**: Total Synced · New (24h / 7d / 30d) · Contacts Protected · Last Sync timestamp with status colour
+- **Donut chart**: suppression breakdown by type
+- **Trend line chart**: suppressions over time, filterable by period (7/30/90 days) and by suppression type
+- **Searchable, paginated suppressions table** with type filter, email search, contact link, action badge
+- **Sync history log** showing every run with status, duration, fetched/added/skipped/unmatched counts and any errors
+- **CSV export** of all suppressions, respecting the active filters
+- **Run Sync Now** button with full-screen overlay, animated four-dot spinner, and live elapsed timer
+
+### Settings
+- **API key field with masked preview** — you can confirm the key is set without revealing it
+- **Color-coded status panel** for the API connection:
+  - 🟢 Green when the key is saved
+  - 🟢 Brighter green after a successful Test Connection
+  - 🟡 Amber when no key is configured
+  - 🔴 Red when Test Connection fails
+- **Test Connection** button that hits SendGrid `/v3/user/profile` and reports the connected account
+- **Sync Interval** picker (5min → 24hr) for cron alignment
+- **Notification email** for sync failures
+- **Spike alert threshold** that emails you when a sync ingests more than N suppressions of any one type
+
+### Security & operations
+- **Encrypted API key storage** using Mautic's IntegrationsBundle EncryptionService
+- **CSRF-protected forms** and AJAX endpoints
+- **Role-based permissions**: separate `dashboard:view` and `settings:edit` permissions
+- **Console command** for cron jobs and manual ops: `mautic:syncdata:sync`
+- **Spike detection + email alerts** for unusual suppression volume
+- **Rate-limit aware** API client that pauses when SendGrid's `X-RateLimit-Remaining` header drops below 10
 
 ---
 
@@ -26,93 +75,101 @@ Protect your sender reputation by ensuring Mautic never sends to addresses that 
 |-------------|---------|
 | Mautic | >= 5.0 |
 | PHP | >= 8.1 |
-| SyncData API Key | v3 with **Suppressions Read** permission |
+| MySQL / MariaDB | per Mautic 5 requirements |
+| SendGrid API Key | v3 with **Suppressions Read** permission |
 
 ---
 
 ## Installation
 
-### Option 1: Manual Installation
+### Step 1 — Clone into the Mautic plugins folder
 
-1. **Clone** the repository directly into your Mautic plugins directory:
+```bash
+cd /path/to/mautic/plugins/
+git clone https://github.com/fabiodemelo/mautic.git MauticSyncDataBundle
+```
 
-   ```bash
-   cd /path/to/mautic/plugins/
-   git clone https://github.com/fabiodemelo/mautic.git MauticSyncDataBundle
-   ```
+> The directory must be named exactly **`MauticSyncDataBundle`** — Mautic discovers plugins by folder name.
 
-2. **Clear the Mautic cache and install the plugin:**
+### Step 2 — Clear cache and install
 
-   ```bash
-   cd /path/to/mautic/
-   php bin/console cache:clear
-   php bin/console mautic:plugins:reload
-   ```
-
-   > **Important:** Always run `cache:clear` and `mautic:plugins:reload` from the **Mautic root directory** (where `bin/console` lives), not from inside the plugins folder.
-
-3. **Verify** the plugin appears in **Settings > Plugins > SyncData**.
-
-### Option 2: Composer (when published to Packagist)
+Run these from the **Mautic root** (the directory that contains `bin/console`):
 
 ```bash
 cd /path/to/mautic/
-composer require mauticplugin/syncdata-bundle
+rm -rf var/cache/*
 php bin/console cache:clear
 php bin/console mautic:plugins:reload
 ```
+
+You should see the plugin counted in the `mautic:plugins:reload` output. The two database tables (`plugin_syncdata_log`, `plugin_syncdata_suppressions`) are created automatically by the bundled migrations.
+
+### Step 3 — Verify
+
+1. Log into Mautic
+2. Open **Settings → Plugins** and confirm **SyncData** appears with the SyncData icon
+3. Open the sidebar — you'll see a new **SyncData** menu with **Dashboard** and **Settings** entries
 
 ---
 
 ## Configuration
 
-### 1. Add Your SyncData API Key
+### 1. Generate a SendGrid API key
 
-1. Navigate to **SyncData > Settings** in the Mautic admin sidebar
-2. Enter your SyncData API Key (requires `Suppressions Read` scope)
-3. Click **Test Connection** to verify
-4. Click **Save Settings**
+1. Go to [SendGrid → Settings → API Keys](https://app.sendgrid.com/settings/api_keys)
+2. Click **Create API Key**
+3. Choose **Restricted Access**
+4. Enable **Suppressions → Read** (Read-only is sufficient — the plugin never writes back to SendGrid)
+5. Click **Create & Copy** the key
 
-> **How to create a SyncData API key:**
-> Go to [SendGrid > Settings > API Keys](https://app.sendgrid.com/settings/api_keys) → Create API Key → Select "Restricted Access" → Enable **Suppressions > Read** → Create & Copy.
+### 2. Connect it to Mautic
 
-### 2. Configure Suppression Types
+1. In Mautic, go to **SyncData → Settings**
+2. Paste the API key into the **SyncData API Key** field
+3. Click **Test Connection** — the panel turns bright green and shows your SendGrid account name
+4. Scroll to the bottom and click **Save Settings**
+5. After save, you'll see a green status badge **Key Saved** plus a masked preview like `SG.zeSNlWa2••••••••••••` so you always know the key is on file
 
-For each of the 6 suppression types, you can:
+### 3. Configure the per-type action
 
-- **Enable/disable** the type for syncing
-- **Choose action mode**:
-  - **Add to DNC** (default) — Adds the contact to Mautic's Do Not Contact list with the appropriate reason
-  - **Add to Segment** — Adds the contact to a specified Mautic segment for review before taking action
+For each of the six suppression types, decide:
 
-| Suppression Type | Default DNC Reason | Use Case |
-|-----------------|-------------------|----------|
-| Bounce | Bounced | Hard/soft bounces from the provider |
-| Spam Report | Unsubscribed | Recipients who reported spam |
-| Block | Manual | Temporarily blocked sends |
-| Invalid Email | Bounced | Invalid email addresses |
+| Action | When to choose |
+|--------|----------------|
+| **Add to DNC** | You want Mautic to immediately stop sending to these addresses (recommended for bounces, invalid emails) |
+| **Add to Segment** | You want a human to review them first — the contact is moved to the segment you pick |
+
+| Suppression Type | Default DNC Reason | Typical use |
+|-----------------|-------------------|-------------|
+| Bounce | Bounced | Hard/soft bounces |
+| Spam Report | Unsubscribed | Recipients who hit "report spam" |
+| Block | Manual | Temporary delivery blocks |
+| Invalid Email | Bounced | Malformed or non-existent addresses |
 | Global Unsubscribe | Unsubscribed | Globally unsubscribed recipients |
-| Group Unsubscribe | Unsubscribed | Unsubscribed from specific groups |
+| Group Unsubscribe | Unsubscribed | Unsubscribed from a SendGrid group |
 
-### 3. Set Sync Schedule
+### 4. Choose schedule and limits
 
-| Setting | Options | Default |
-|---------|---------|---------|
-| Sync Interval | 5min, 15min, 30min, 1hr, 6hr, 12hr, 24hr | 15 minutes |
-| Initial Sync Range | 7 days, 30 days, 90 days, All time | 30 days |
-| Notification Email | Any valid email | (empty) |
-| Spike Threshold | Any positive integer | 50 |
+| Setting | Options | Default | What it does |
+|---------|---------|---------|--------------|
+| Sync Interval | 5 min / 15 min / 30 min / 1 hr / 6 hr / 12 hr / 24 hr | 15 min | Set your cron to match this cadence |
+| Initial Sync Range | 7 / 30 / 90 days, All time | 30 days | How far back to look on the very first sync (or any `--type=full` run) |
+| Max Records Per Sync | 0 = unlimited, otherwise N | 0 | Caps each run — useful when first importing a list of 50k+ suppressions |
+| Notification Email | Any email | (empty) | Where failure and spike alerts are sent |
+| Spike Threshold | Positive integer | 50 | Alert if any single type ingests more than this in one run |
 
-### 4. Set Up the Cron Job
+Click **Save Settings**.
 
-Add this to your server's crontab:
+### 5. Set up the cron job
 
-```bash
-# Run every 15 minutes (match your configured interval)
-*/15 * * * * php /path/to/mautic/bin/console mautic:syncdata:sync --type=incremental
+Add this to your crontab (`crontab -e`) so syncs run automatically:
 
-# Or for a full re-sync (e.g., once per week)
-0 2 * * 0 php /path/to/mautic/bin/console mautic:syncdata:sync --type=full
+```cron
+# Incremental sync every 15 minutes — match your Sync Interval setting
+*/15 * * * * php /path/to/mautic/bin/console mautic:syncdata:sync --type=incremental >/dev/null 2>&1
+
+# Optional: weekly full re-sync on Sunday 2 AM (catches anything that slipped through)
+0 2 * * 0 php /path/to/mautic/bin/console mautic:syncdata:sync --type=full >/dev/null 2>&1
 ```
 
 ---
@@ -121,151 +178,261 @@ Add this to your server's crontab:
 
 ### Dashboard
 
-Navigate to **SyncData > Dashboard** to see:
+Open **SyncData → Dashboard** to see:
 
-- **Summary cards**: Total synced, new suppressions (24h/7d/30d), contacts protected, last sync status
-- **Breakdown chart**: Donut chart showing suppression distribution by type
-- **Trend chart**: Line chart showing suppressions over time (filterable by period and type)
-- **Suppressions table**: Searchable, filterable, paginated table of all synced suppressions
-- **Sync history**: Log of all sync runs with status, duration, and record counts
+- **4 cards** at the top: Total Synced · New (24h/7d/30d) · Contacts Protected · Last Sync timestamp
+- **Suppression Breakdown** donut chart — instant view of which suppression type dominates
+- **Suppression Trends** line chart — filter by period and by type
+- **Recent Suppressions** table — search by email, filter by type, paginate, click an email to jump to the contact
+- **Sync History** table — every run with start time, duration, counts and any error
+- **Run Sync Now** button — triggers a synchronous sync with a full-screen progress overlay
 
-### Manual Sync
+### CSV export
 
-Click **Run Sync Now** on the dashboard to trigger an immediate sync.
+Click **Export CSV** to download every synced suppression. Filters in the search row are honored.
 
-### CSV Export
-
-Click **Export CSV** on the dashboard to download all suppressions (respects active filters).
-
-### Console Commands
+### Console commands
 
 ```bash
-# Incremental sync (default — only new since last sync)
+# Incremental sync (default — only suppressions added since the last successful run)
 php bin/console mautic:syncdata:sync
 
-# Full sync (re-sync everything within configured range)
+# Full re-sync within the configured Initial Sync Range
 php bin/console mautic:syncdata:sync --type=full
 
-# Sync only bounces
+# Sync only one suppression type
 php bin/console mautic:syncdata:sync --suppression=bounce
 
-# Dry run (preview without changes)
+# Dry run — show what would happen, change nothing
 php bin/console mautic:syncdata:sync --dry-run
 
-# Combine options
+# Combine flags
 php bin/console mautic:syncdata:sync --type=full --suppression=spam_report --dry-run
 ```
 
-**Suppression type values for `--suppression`:**
-`bounce`, `spam_report`, `block`, `invalid_email`, `global_unsubscribe`, `group_unsubscribe`
+**Valid `--suppression` values:**
+`bounce` · `spam_report` · `block` · `invalid_email` · `global_unsubscribe` · `group_unsubscribe`
 
 ---
 
-## Database Tables
+## How matching works
 
-The plugin creates two tables:
+For every suppression coming back from SendGrid, the plugin:
+
+1. **Looks up the contact** by email (case-insensitive, batched with `IN (...)` for speed)
+2. If a contact exists → applies the configured action (DNC or Segment)
+3. If no contact exists → marks the suppression as **UNMATCHED** but still records it for reference
+4. On every subsequent sync, the plugin **re-checks all UNMATCHED rows** (up to 500 per run) and links them as soon as the matching contact gets created in Mautic
+
+This means you never lose suppression data, even if SendGrid knows about an address before Mautic does.
+
+---
+
+## Database
+
+The plugin creates two tables (auto-managed via Doctrine migrations):
 
 | Table | Purpose |
 |-------|---------|
-| `plugin_syncdata_log` | Sync run history (timestamp, status, counts, errors) |
-| `plugin_syncdata_suppressions` | Cache of all synced suppressions (email, type, reason, action taken) |
+| `plugin_syncdata_log` | Every sync run with status, duration, counts, errors, breakdown JSON |
+| `plugin_syncdata_suppressions` | One row per (email + type + source date) with the action taken and the linked Mautic contact id |
 
-Tables are created automatically via Doctrine migrations when the plugin is installed.
+Indexes are defined on `email`, `suppression_type`, `synced_at`, `mautic_contact_id`, and a **unique** constraint on `(email, suppression_type, source_created_at)` enforces deduplication.
 
 ---
 
 ## Permissions
 
-The plugin uses Mautic's role-based permission system:
+The plugin registers two permission groups under Mautic's role system:
 
-| Permission | Access |
+| Permission | Grants |
 |-----------|--------|
-| `syncdata:dashboard:view` | View the dashboard (read-only) |
-| `syncdata:settings:manage` | Change settings, trigger manual sync, export data |
+| `plugin:syncdata:dashboard:view` | View the dashboard, suppressions table, sync history (read-only) |
+| `plugin:syncdata:settings:edit` | Change settings, run manual sync, export CSV |
 
-Configure in **Settings > Roles**.
+Configure per-role under **Settings → Roles**.
 
 ---
 
-## Architecture
+## Plugin Architecture
 
 ```
 plugins/MauticSyncDataBundle/
-├── Assets/css/js/              # Dashboard styles and Chart.js interactions
-├── Command/                    # mautic:syncdata:sync console command
-├── Config/config.php           # Routes, services, menu registration
-├── Controller/                 # Dashboard, Settings, Sync controllers
-├── Entity/                     # SyncLog + Suppression entities & repositories
-├── Form/Type/                  # Config form types (auth + features)
-├── Integration/                # IntegrationsBundle integration class
-├── Migrations/                 # Database schema migrations
-├── Security/Permissions/       # Role-based permissions
-├── Service/                    # Core services (API client, sync engine, etc.)
-├── Tests/Unit/                 # PHPUnit tests
-├── Translations/en_US/         # English translations
-└── Views/                      # Twig templates (dashboard + settings)
+├── MauticSyncDataBundle.php       # Bundle registration
+├── composer.json                  # Package metadata
+├── README.md                      # This file
+├── ARCHITECTURE.md                # Technical reference
+├── masterplan.md                  # Product vision
+│
+├── Assets/
+│   ├── css/syncdata.css           # Dashboard + settings styles
+│   ├── js/dashboard.js            # Charts, AJAX, sync overlay
+│   └── img/syncdata.jpg           # Plugin logo shown in Settings → Plugins
+│
+├── Command/
+│   └── SyncCommand.php            # `mautic:syncdata:sync` console command
+│
+├── Config/
+│   └── config.php                 # Routes, services, menu, version
+│
+├── Controller/
+│   ├── DashboardController.php    # Dashboard page + AJAX endpoints
+│   ├── SettingsController.php     # Settings page, save, test connection
+│   └── SyncController.php         # Manual sync trigger and status
+│
+├── Entity/
+│   ├── Suppression.php            # Cached suppression entity
+│   ├── SuppressionRepository.php  # Stats, search, dedup, find-unmatched
+│   ├── SyncLog.php                # Sync run entity
+│   └── SyncLogRepository.php      # History queries
+│
+├── Form/Type/
+│   ├── ConfigAuthType.php         # API key form
+│   └── ConfigFeaturesType.php     # Feature settings form
+│
+├── Integration/
+│   └── SyncDataIntegration.php    # IntegrationsBundle integration class
+│
+├── Migrations/
+│   ├── Version20260330001.php     # plugin_syncdata_log table
+│   └── Version20260330002.php     # plugin_syncdata_suppressions table
+│
+├── Resources/
+│   └── views/                     # Twig templates (Dashboard, Settings)
+│
+├── Security/
+│   └── Permissions/
+│       └── SyncDataPermissions.php
+│
+├── Service/
+│   ├── SyncDataApiClient.php      # Guzzle client for SendGrid v3 API
+│   ├── SuppressionFetcher.php     # Per-type fetch + pagination + normalization
+│   ├── ContactResolver.php        # Batch email → Lead lookup
+│   ├── DncMapper.php              # Suppression type → DNC reason mapping
+│   ├── SyncEngine.php             # Orchestrates the whole sync flow
+│   ├── StatsCalculator.php        # Dashboard stats and chart data
+│   └── NotificationService.php    # Failure + spike emails
+│
+├── Tests/Unit/                    # PHPUnit tests
+└── Translations/en_US/            # English strings
 ```
 
-### Service Dependency Graph
+### Service dependency graph
 
 ```
-SyncCommand → SyncEngine
-                ├── SuppressionFetcher → SyncDataApiClient
-                ├── ContactResolver → LeadModel
-                ├── DncMapper
-                ├── DoNotContactModel (Mautic)
-                ├── SegmentModel (Mautic)
-                └── NotificationService → MailHelper
+SyncCommand ─┐
+SyncController ─┼─► SyncEngine ─┬─► SuppressionFetcher ─► SyncDataApiClient ─► (SendGrid API)
+                │                ├─► ContactResolver ────► EntityManager (Lead)
+                │                ├─► DncMapper
+                │                ├─► DoNotContact (Mautic) — for DNC mode
+                │                ├─► ListModel (Mautic)    — for Segment mode
+                │                └─► NotificationService ──► MailHelper
+
+DashboardController ─► StatsCalculator ─► Suppression / SyncLog repositories
+SettingsController  ─► IntegrationsHelper, EncryptionService, ListModel
 ```
-
----
-
-## Troubleshooting
-
-### "SyncData API key is not configured"
-Go to **SyncData > Settings**, enter your API key, and click **Save**.
-
-### "Connection failed: 403 Forbidden"
-Your API key doesn't have the required permissions. Create a new key with **Suppressions Read** access.
-
-### Sync runs but finds 0 records
-- Check your **Initial Sync Range** — if set to 7 days and no suppressions occurred in the last 7 days, nothing will sync
-- Verify the suppression types are **enabled** in Settings
-- Try a **full sync**: `php bin/console mautic:syncdata:sync --type=full`
-
-### High memory usage during sync
-The plugin processes in batches of 100 and clears Doctrine's identity map between batches. If you have >100k suppressions, consider running the initial full sync during off-peak hours.
 
 ---
 
 ## Updating
 
-To update the plugin to the latest version:
-
 ```bash
 cd /path/to/mautic/plugins/MauticSyncDataBundle/
 git pull
+
 cd /path/to/mautic/
+rm -rf var/cache/*
 php bin/console cache:clear
 php bin/console mautic:plugins:reload
 ```
+
+CSS and JS are cache-busted automatically by the templates, so the browser pulls the new versions on next reload.
+
+---
+
+## Troubleshooting
+
+### "SyncData API key is not configured or could not be decrypted"
+Open **SyncData → Settings**, paste your SendGrid key into the input field, and click **Save Settings**. (This typically happens after upgrading from a pre-2.0 build that stored keys unencrypted.)
+
+### "Connection failed: 403 Forbidden"
+Your API key doesn't have the right scope. Generate a new SendGrid key with **Suppressions → Read** enabled and re-save.
+
+### Sync runs but only finds a few records
+1. Check **Initial Sync Range** — the default 30 days excludes older suppressions. Set to **All time** and run `--type=full` once.
+2. Check **Max Records Per Sync** — if it's set to a small number, the run stops there. Set to `0` for unlimited.
+3. Make sure the suppression types you care about are **enabled** on the Settings page.
+
+### Dashboard or Settings shows "Uh oh! I think I broke it…"
+Check the Mautic log for the real error:
+```bash
+tail -50 /path/to/mautic/var/logs/mautic_prod-$(date +%Y-%m-%d).php
+```
+Then email the relevant lines to **support@demelos.com**.
+
+### Action Taken says "UNMATCHED" for everything
+Those email addresses don't exist as Mautic contacts. The plugin still records them, and the next sync will auto-link any that get added to Mautic later. If the contacts *do* exist, double-check the email addresses in **Contacts** for typos or extra whitespace.
+
+### Browser shows the old UI after an update
+Hard-refresh with `Ctrl+Shift+R` (Windows / Linux) or `Cmd+Shift+R` (macOS). The plugin includes per-minute cache-busting on its CSS/JS but a stuck cache can still happen.
+
+### High memory usage during a huge first import
+Set **Max Records Per Sync** to e.g. `5000`, run a full sync, then run incremental syncs on a tighter cron until the backlog clears.
 
 ---
 
 ## Uninstallation
 
-1. Disable the plugin in **Settings > Plugins**
+1. Disable the plugin under **Settings → Plugins** (toggle off and save)
 2. Remove the plugin directory and clear cache:
    ```bash
    cd /path/to/mautic/
    rm -rf plugins/MauticSyncDataBundle/
+   rm -rf var/cache/*
    php bin/console cache:clear
    ```
-4. The database tables (`plugin_syncdata_log`, `plugin_syncdata_suppressions`) will remain. To remove them manually:
+3. (Optional) Drop the plugin database tables:
    ```sql
    DROP TABLE IF EXISTS plugin_syncdata_suppressions;
    DROP TABLE IF EXISTS plugin_syncdata_log;
    ```
+4. (Optional) Remove the integration row:
+   ```sql
+   DELETE FROM plugin_integration_settings WHERE name = 'SyncData';
+   ```
+
+---
+
+## Changelog
+
+### v2.0.0
+- Mautic 5.x compatible (Symfony 6, PHP 8.1+)
+- Encrypted API key storage via IntegrationsBundle EncryptionService
+- New full-screen sync overlay with animated spinner and elapsed timer
+- New **Max Records Per Sync** setting for chunked imports
+- New **API key masked preview** and **color-coded status panel** (Saved / Verified / Missing / Invalid)
+- Auto re-link of previously UNMATCHED suppressions on every sync
+- Cache-busted CSS/JS so updates show up immediately
+- Fully refactored to follow the Mautic 5 controller pattern
+- Plugin renamed throughout — display name, services, entities, and translations now use **SyncData**
+
+### v1.0.0
+- Initial release
+
+---
+
+## Support
+
+Questions, bug reports, or feature requests:
+
+- **Email:** [support@demelos.com](mailto:support@demelos.com)
+- **Issues:** https://github.com/fabiodemelo/mautic/issues
+
+When reporting a bug, please include:
+1. Mautic version (`php bin/console --version`)
+2. PHP version (`php -v`)
+3. The plugin version (from `composer.json` or `Config/config.php`)
+4. The relevant lines from `var/logs/mautic_prod-YYYY-MM-DD.php`
 
 ---
 
@@ -273,8 +440,6 @@ php bin/console mautic:plugins:reload
 
 GPL-3.0-or-later
 
----
-
 ## Author
 
-Fabio de Melo
+**Fabio de Melo** · [support@demelos.com](mailto:support@demelos.com)
