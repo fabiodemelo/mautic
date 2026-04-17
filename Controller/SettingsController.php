@@ -77,11 +77,24 @@ class SettingsController extends CommonController
             $integration       = $integrationsHelper->getIntegration(SyncDataIntegration::NAME);
             $integrationConfig = $integration->getIntegrationConfiguration();
 
-            $apiKey = $request->request->get('api_key');
-            if (null !== $apiKey && '' !== $apiKey) {
-                // Encrypt before storing — IntegrationsHelper auto-decrypts on read
-                $encryptedKeys = $encryptionService->encrypt(['api_key' => $apiKey]);
-                $integrationConfig->setApiKeys($encryptedKeys);
+            // IntegrationsHelper has already decrypted the existing keys onto the entity.
+            // We must always re-encrypt before flushing, otherwise the plain-text value
+            // gets persisted and the next read attempts to decrypt it again, returning false.
+            $existingKeys = $integrationConfig->getApiKeys() ?? [];
+            $newApiKey    = $request->request->get('api_key');
+
+            if (is_string($newApiKey) && '' !== $newApiKey) {
+                $existingKeys['api_key'] = $newApiKey;
+            }
+
+            // Drop any non-string values (e.g. false from a previously corrupted decrypt)
+            $existingKeys = array_filter(
+                $existingKeys,
+                static fn ($v) => is_string($v) && '' !== $v,
+            );
+
+            if (!empty($existingKeys)) {
+                $integrationConfig->setApiKeys($encryptionService->encrypt($existingKeys));
             }
 
             $featureSettings = [
