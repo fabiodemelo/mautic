@@ -159,7 +159,7 @@
                                         {% endif %}
                                     </td>
                                     <td><span class="label sd-type-{{ item.type }}">{{ item.type_label }}</span></td>
-                                    <td class="sd-reason-cell" title="{{ item.reason }}">{{ item.reason|default('-')|truncate(60) }}</td>
+                                    <td class="sd-reason-cell" title="{{ item.reason }}">{{ (item.reason|default('-'))|slice(0, 60) }}{% if item.reason|default('')|length > 60 %}…{% endif %}</td>
                                     <td>{{ item.source_date }}</td>
                                     <td>{{ item.synced_date }}</td>
                                     <td><span class="label label-{{ item.action == 'dnc' ? 'danger' : (item.action == 'segment' ? 'info' : 'default') }}">{{ item.action|upper }}</span></td>
