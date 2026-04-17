@@ -63,18 +63,22 @@ class SyncEngine
 
             $allSuppressions = $this->suppressionFetcher->fetchAll($enabledTypes, $startTime);
 
-            $totalFetched = 0;
-            $totalAdded   = 0;
-            $totalSkipped = 0;
+            $maxPerSync = (int) ($settings['max_per_sync'] ?? 0);
+
+            $totalFetched   = 0;
+            $totalAdded     = 0;
+            $totalSkipped   = 0;
             $totalUnmatched = 0;
-            $breakdown    = [];
+            $totalProcessed = 0;
+            $breakdown      = [];
+            $reachedCap     = false;
 
             foreach ($allSuppressions as $type => $suppressions) {
                 $count = count($suppressions);
                 $totalFetched += $count;
                 $breakdown[$type] = 0;
 
-                if (0 === $count) {
+                if (0 === $count || $reachedCap) {
                     continue;
                 }
 
@@ -87,6 +91,11 @@ class SyncEngine
                 $batchCount = 0;
 
                 foreach ($suppressions as $record) {
+                    if ($maxPerSync > 0 && $totalProcessed >= $maxPerSync) {
+                        $reachedCap = true;
+                        break;
+                    }
+                    ++$totalProcessed;
                     $email = $record['email'];
 
                     $suppressionRepo = $this->getSuppressionRepository();

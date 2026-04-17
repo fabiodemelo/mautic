@@ -126,6 +126,16 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="control-label">{{ 'mautic.syncdata.settings.max_per_sync'|trans }}</label>
+                            <input type="number" name="max_per_sync" class="form-control"
+                                   value="{{ settings.max_per_sync|default(0) }}" min="0">
+                            <p class="help-block">{{ 'mautic.syncdata.settings.max_per_sync.help'|trans }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

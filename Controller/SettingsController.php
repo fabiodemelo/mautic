@@ -90,6 +90,7 @@ class SettingsController extends CommonController
                 'target_segments'     => $request->request->all('target_segments') ?: [],
                 'notification_email'  => $request->request->get('notification_email', ''),
                 'spike_threshold'     => (int) $request->request->get('spike_threshold', 50),
+                'max_per_sync'        => (int) $request->request->get('max_per_sync', 0),
             ];
 
             $integrationConfig->setFeatureSettings($featureSettings);
