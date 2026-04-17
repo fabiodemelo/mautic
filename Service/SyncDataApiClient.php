@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace MauticPlugin\MauticSyncDataBundle\Service;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Psr\Log\LoggerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SyncDataApiClient
 {
@@ -15,7 +16,7 @@ class SyncDataApiClient
     private ?string $apiKey = null;
 
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
+        private readonly Client $httpClient,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -116,6 +117,7 @@ class SyncDataApiClient
                 'Authorization' => 'Bearer '.$this->apiKey,
                 'Content-Type'  => 'application/json',
             ],
+            'http_errors' => false,
         ];
 
         if (!empty($query)) {
@@ -126,14 +128,20 @@ class SyncDataApiClient
 
         $this->logger->debug('SyncData API request', ['method' => $method, 'url' => $url]);
 
-        $response   = $this->httpClient->request($method, $url, $options);
+        try {
+            $response = $this->httpClient->request($method, $url, $options);
+        } catch (GuzzleException $e) {
+            $this->logger->error('SyncData HTTP error', ['error' => $e->getMessage()]);
+            throw new \RuntimeException('SyncData HTTP error: '.$e->getMessage(), 0, $e);
+        }
+
         $statusCode = $response->getStatusCode();
+        $body       = (string) $response->getBody();
 
         if ($statusCode >= 400) {
-            $body    = $response->getContent(false);
             $decoded = json_decode($body, true);
             $errors  = $decoded['errors'] ?? [];
-            $message = !empty($errors) ? $errors[0]['message'] : "HTTP {$statusCode}";
+            $message = !empty($errors) ? ($errors[0]['message'] ?? "HTTP {$statusCode}") : "HTTP {$statusCode}";
 
             $this->logger->error('SyncData API error', [
                 'status' => $statusCode,
@@ -143,15 +151,18 @@ class SyncDataApiClient
             throw new \RuntimeException("SyncData API error: {$message}");
         }
 
-        $headers = $response->getHeaders();
-        $this->checkRateLimit($headers);
+        $this->checkRateLimit($response->getHeaders());
 
-        return $response->toArray();
+        $decoded = json_decode($body, true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 
     private function checkRateLimit(array $headers): void
     {
-        $remaining = $headers['x-ratelimit-remaining'][0] ?? null;
+        $remaining = $headers['X-RateLimit-Remaining'][0]
+            ?? $headers['x-ratelimit-remaining'][0]
+            ?? null;
 
         if (null !== $remaining && (int) $remaining < 10) {
             $this->logger->warning('SyncData rate limit nearly exhausted', [

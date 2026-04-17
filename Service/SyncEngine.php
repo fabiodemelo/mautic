@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MauticPlugin\MauticSyncDataBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Mautic\LeadBundle\Entity\DoNotContact;
-use Mautic\LeadBundle\Model\DoNotContactModel;
+use Mautic\LeadBundle\Entity\DoNotContact as DoNotContactEntity;
+use Mautic\LeadBundle\Model\DoNotContact;
 use Mautic\LeadBundle\Model\ListModel;
 use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
 use MauticPlugin\MauticSyncDataBundle\Entity\SuppressionRepository;
@@ -22,7 +22,7 @@ class SyncEngine
         private readonly SuppressionFetcher $suppressionFetcher,
         private readonly ContactResolver $contactResolver,
         private readonly DncMapper $dncMapper,
-        private readonly DoNotContactModel $dncModel,
+        private readonly DoNotContact $dncModel,
         private readonly ListModel $listModel,
         private readonly EntityManagerInterface $entityManager,
         private readonly NotificationService $notificationService,

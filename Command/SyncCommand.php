@@ -22,6 +22,7 @@ class SyncCommand extends Command
     public function __construct(
         private readonly SyncEngine $syncEngine,
         private readonly IntegrationsHelper $integrationsHelper,
+        private readonly SyncDataApiClient $apiClient,
     ) {
         parent::__construct();
     }
@@ -29,6 +30,7 @@ class SyncCommand extends Command
     protected function configure(): void
     {
         $this
+            ->setName('mautic:syncdata:sync')
             ->setDescription('Sync suppressions to Mautic DNC or segments')
             ->addOption('type', null, InputOption::VALUE_OPTIONAL, 'Sync type: incremental or full', 'incremental')
             ->addOption('suppression', null, InputOption::VALUE_OPTIONAL, 'Specific suppression type to sync')
@@ -41,15 +43,15 @@ class SyncCommand extends Command
 
         try {
             $integration = $this->integrationsHelper->getIntegration(SyncDataIntegration::NAME);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             $io->error('SyncData integration is not configured or not enabled.');
 
             return Command::FAILURE;
         }
 
-        $integrationConfig  = $integration->getIntegrationConfiguration();
-        $apiKeys            = $integrationConfig->getApiKeys();
-        $featureSettings    = $integrationConfig->getFeatureSettings();
+        $integrationConfig = $integration->getIntegrationConfiguration();
+        $apiKeys           = $integrationConfig->getApiKeys();
+        $featureSettings   = $integrationConfig->getFeatureSettings() ?? [];
 
         $apiKey = $apiKeys['api_key'] ?? '';
         if ('' === $apiKey) {
@@ -58,19 +60,15 @@ class SyncCommand extends Command
             return Command::FAILURE;
         }
 
-        // Inject API key into the client via the sync engine's fetcher
-        $apiClient = $this->getApiClient();
-        if (null !== $apiClient) {
-            $apiClient->setApiKey($apiKey);
-        }
+        $this->apiClient->setApiKey($apiKey);
 
-        $syncType       = $input->getOption('type');
-        $specificType   = $input->getOption('suppression');
-        $dryRun         = $input->getOption('dry-run');
+        $syncType     = $input->getOption('type');
+        $specificType = $input->getOption('suppression');
+        $dryRun       = (bool) $input->getOption('dry-run');
 
         $syncTypeConst = match ($syncType) {
-            'full'   => SyncLog::TYPE_FULL,
-            default  => SyncLog::TYPE_INCREMENTAL,
+            'full'  => SyncLog::TYPE_FULL,
+            default => SyncLog::TYPE_INCREMENTAL,
         };
 
         $io->title('SyncData');
@@ -97,37 +95,18 @@ class SyncCommand extends Command
             $syncLog->getDurationSeconds() ?? 0,
         ));
 
-        if ($syncLog->getSuppressionBreakdown()) {
+        $breakdown = $syncLog->getSuppressionBreakdown();
+        if (!empty($breakdown)) {
             $io->table(
                 ['Type', 'Count'],
                 array_map(
                     fn ($type, $count) => [$type, $count],
-                    array_keys($syncLog->getSuppressionBreakdown()),
-                    array_values($syncLog->getSuppressionBreakdown()),
+                    array_keys($breakdown),
+                    array_values($breakdown),
                 ),
             );
         }
 
         return Command::SUCCESS;
-    }
-
-    private function getApiClient(): ?SyncDataApiClient
-    {
-        // Access the API client through reflection to set the key
-        // This is resolved via the service container in the actual runtime
-        try {
-            $reflection = new \ReflectionClass($this->syncEngine);
-            $prop = $reflection->getProperty('suppressionFetcher');
-            $prop->setAccessible(true);
-            $fetcher = $prop->getValue($this->syncEngine);
-
-            $fetcherRef = new \ReflectionClass($fetcher);
-            $clientProp = $fetcherRef->getProperty('apiClient');
-            $clientProp->setAccessible(true);
-
-            return $clientProp->getValue($fetcher);
-        } catch (\Throwable) {
-            return null;
-        }
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MauticPlugin\MauticSyncDataBundle\Controller;
 
-use Mautic\CoreBundle\Controller\AbstractFormController;
+use Mautic\CoreBundle\Controller\CommonController;
 use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
 use MauticPlugin\MauticSyncDataBundle\Service\StatsCalculator;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,24 +12,19 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class DashboardController extends AbstractFormController
+class DashboardController extends CommonController
 {
-    public function __construct(
-        private readonly StatsCalculator $statsCalculator,
-    ) {
-    }
-
-    public function indexAction(): Response
+    public function indexAction(StatsCalculator $statsCalculator): Response
     {
         if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return $this->accessDenied();
         }
 
-        $stats     = $this->statsCalculator->getSummaryCards();
-        $breakdown = $this->statsCalculator->getBreakdownData();
-        $trend     = $this->statsCalculator->getTrendData('30d');
-        $recent    = $this->statsCalculator->getRecentSuppressions(1, 10);
-        $history   = $this->statsCalculator->getSyncHistory(1, 5);
+        $stats     = $statsCalculator->getSummaryCards();
+        $breakdown = $statsCalculator->getBreakdownData();
+        $trend     = $statsCalculator->getTrendData('30d');
+        $recent    = $statsCalculator->getRecentSuppressions(1, 10);
+        $history   = $statsCalculator->getSyncHistory(1, 5);
 
         return $this->delegateView([
             'viewParameters' => [
@@ -49,36 +44,36 @@ class DashboardController extends AbstractFormController
         ]);
     }
 
-    public function statsAction(): JsonResponse
+    public function statsAction(StatsCalculator $statsCalculator): JsonResponse
     {
         if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
         }
 
-        return new JsonResponse($this->statsCalculator->getSummaryCards());
+        return new JsonResponse($statsCalculator->getSummaryCards());
     }
 
-    public function chartDataAction(Request $request, string $type): JsonResponse
+    public function chartDataAction(Request $request, StatsCalculator $statsCalculator, string $type): JsonResponse
     {
         if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
         }
 
         if ('breakdown' === $type) {
-            return new JsonResponse($this->statsCalculator->getBreakdownData());
+            return new JsonResponse($statsCalculator->getBreakdownData());
         }
 
         if ('trend' === $type) {
-            $period         = $request->query->get('period', '30d');
+            $period          = $request->query->get('period', '30d');
             $suppressionType = $request->query->get('suppression_type');
 
-            return new JsonResponse($this->statsCalculator->getTrendData($period, $suppressionType));
+            return new JsonResponse($statsCalculator->getTrendData($period, $suppressionType));
         }
 
         return new JsonResponse(['error' => 'Invalid chart type'], 400);
     }
 
-    public function suppressionsAction(Request $request): JsonResponse
+    public function suppressionsAction(Request $request, StatsCalculator $statsCalculator): JsonResponse
     {
         if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
@@ -95,10 +90,10 @@ class DashboardController extends AbstractFormController
 
         $filters = array_filter($filters);
 
-        return new JsonResponse($this->statsCalculator->getRecentSuppressions($page, $limit, $filters));
+        return new JsonResponse($statsCalculator->getRecentSuppressions($page, $limit, $filters));
     }
 
-    public function historyAction(Request $request): JsonResponse
+    public function historyAction(Request $request, StatsCalculator $statsCalculator): JsonResponse
     {
         if (!$this->security->isGranted('plugin:syncdata:dashboard:view')) {
             return new JsonResponse(['error' => 'Access denied'], 403);
@@ -107,12 +102,12 @@ class DashboardController extends AbstractFormController
         $page  = max(1, (int) $request->query->get('page', 1));
         $limit = min(50, max(1, (int) $request->query->get('limit', 20)));
 
-        return new JsonResponse($this->statsCalculator->getSyncHistory($page, $limit));
+        return new JsonResponse($statsCalculator->getSyncHistory($page, $limit));
     }
 
-    public function exportAction(Request $request): Response
+    public function exportAction(Request $request, StatsCalculator $statsCalculator): Response
     {
-        if (!$this->security->isGranted('plugin:syncdata:settings:manage')) {
+        if (!$this->security->isGranted('plugin:syncdata:settings:edit')) {
             return $this->accessDenied();
         }
 
@@ -124,13 +119,13 @@ class DashboardController extends AbstractFormController
         ];
         $filters = array_filter($filters);
 
-        $response = new StreamedResponse(function () use ($filters) {
+        $response = new StreamedResponse(function () use ($filters, $statsCalculator) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, ['Email', 'Type', 'Reason', 'Status', 'Source Date', 'Synced Date', 'Action', 'Contact ID']);
 
             $page = 1;
             do {
-                $result = $this->statsCalculator->getRecentSuppressions($page, 100, $filters);
+                $result = $statsCalculator->getRecentSuppressions($page, 100, $filters);
                 foreach ($result['items'] as $item) {
                     fputcsv($handle, [
                         $item['email'],

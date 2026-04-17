@@ -77,7 +77,7 @@ return [
                     ],
                     'mautic.syncdata.menu.settings' => [
                         'route'  => 'mautic_syncdata_settings',
-                        'access' => 'plugin:syncdata:settings:manage',
+                        'access' => 'plugin:syncdata:settings:edit',
                     ],
                 ],
             ],
@@ -85,38 +85,6 @@ return [
     ],
 
     'services' => [
-        'controllers' => [
-            'mautic.syncdata.controller.dashboard' => [
-                'class'     => \MauticPlugin\MauticSyncDataBundle\Controller\DashboardController::class,
-                'arguments' => [
-                    'mautic.syncdata.service.stats_calculator',
-                ],
-                'methodCalls' => [
-                    'setContainer' => ['service_container'],
-                ],
-            ],
-            'mautic.syncdata.controller.settings' => [
-                'class'     => \MauticPlugin\MauticSyncDataBundle\Controller\SettingsController::class,
-                'arguments' => [
-                    'mautic.integrations.helper',
-                    'mautic.syncdata.service.api_client',
-                ],
-                'methodCalls' => [
-                    'setContainer' => ['service_container'],
-                ],
-            ],
-            'mautic.syncdata.controller.sync' => [
-                'class'     => \MauticPlugin\MauticSyncDataBundle\Controller\SyncController::class,
-                'arguments' => [
-                    'mautic.syncdata.service.sync_engine',
-                    'mautic.integrations.helper',
-                    'mautic.syncdata.service.api_client',
-                ],
-                'methodCalls' => [
-                    'setContainer' => ['service_container'],
-                ],
-            ],
-        ],
         'integrations' => [
             'mautic.integration.syncdata' => [
                 'class' => \MauticPlugin\MauticSyncDataBundle\Integration\SyncDataIntegration::class,
@@ -185,6 +153,7 @@ return [
                 'arguments' => [
                     'mautic.syncdata.service.sync_engine',
                     'mautic.integrations.helper',
+                    'mautic.syncdata.service.api_client',
                 ],
                 'tags' => ['console.command'],
             ],

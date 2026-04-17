@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MauticPlugin\MauticSyncDataBundle\Service;
 
-use Mautic\CoreBundle\Helper\MailHelper;
+use Mautic\EmailBundle\Helper\MailHelper;
 use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
 use MauticPlugin\MauticSyncDataBundle\Entity\SyncLog;
 use Psr\Log\LoggerInterface;
