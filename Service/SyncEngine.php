@@ -61,6 +61,9 @@ class SyncEngine
                 'dryRun'       => $dryRun,
             ]);
 
+            // Try to re-link any previously UNMATCHED records (contact may have been added since)
+            $this->relinkUnmatched($settings, $dryRun);
+
             $allSuppressions = $this->suppressionFetcher->fetchAll($enabledTypes, $startTime);
 
             $maxPerSync = (int) ($settings['max_per_sync'] ?? 0);
@@ -256,6 +259,52 @@ class SyncEngine
                 $this->notificationService->sendSpikeAlert($type, $count, $threshold, $notificationEmail);
             }
         }
+    }
+
+    /**
+     * Re-link any UNMATCHED suppressions whose contact has since been created.
+     */
+    private function relinkUnmatched(array $settings, bool $dryRun): void
+    {
+        $unmatched = $this->getSuppressionRepository()->findUnmatched(500);
+        if (empty($unmatched)) {
+            return;
+        }
+
+        $emails     = array_map(fn (Suppression $s) => $s->getEmail(), $unmatched);
+        $contactMap = $this->contactResolver->resolveByEmails($emails);
+
+        foreach ($unmatched as $suppression) {
+            $contact = $contactMap[strtolower($suppression->getEmail())] ?? null;
+            if (null === $contact) {
+                continue;
+            }
+
+            $suppression->setMauticContactId($contact->getId());
+            $type       = $suppression->getSuppressionType();
+            $actionMode = $this->getActionMode($type, $settings);
+            $segmentId  = $this->getTargetSegment($type, $settings);
+
+            if ($dryRun) {
+                continue;
+            }
+
+            if ('segment' === $actionMode && null !== $segmentId) {
+                $this->addContactToSegment($contact, $segmentId);
+                $suppression->setActionTaken(Suppression::ACTION_SEGMENT);
+            } else {
+                $dncReason = $this->dncMapper->getDncReason($type);
+                $comment   = $this->dncMapper->buildComment(
+                    $type,
+                    $suppression->getSourceReason(),
+                    $suppression->getSourceStatus(),
+                );
+                $this->dncModel->addDncForContact($contact, 'email', $dncReason, $comment);
+                $suppression->setActionTaken(Suppression::ACTION_DNC);
+            }
+        }
+
+        $this->entityManager->flush();
     }
 
     private function getSyncLogRepository(): SyncLogRepository

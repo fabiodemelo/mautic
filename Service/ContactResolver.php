@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MauticPlugin\MauticSyncDataBundle\Service;
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Mautic\LeadBundle\Entity\Lead;
 use Mautic\LeadBundle\Model\LeadModel;
@@ -36,22 +37,26 @@ class ContactResolver
             return [];
         }
 
-        $emails     = array_map(fn (string $e) => strtolower(trim($e)), $emails);
-        $emails     = array_unique($emails);
-        $result     = array_fill_keys($emails, null);
+        $emails = array_map(fn (string $e) => strtolower(trim($e)), $emails);
+        $emails = array_values(array_unique($emails));
+        $result = array_fill_keys($emails, null);
 
-        $qb = $this->entityManager->createQueryBuilder()
-            ->select('l')
-            ->from(Lead::class, 'l')
-            ->where('LOWER(l.email) IN (:emails)')
-            ->setParameter('emails', $emails);
+        $query = $this->entityManager->createQuery(
+            'SELECT l FROM '.Lead::class.' l WHERE l.email IN (:emails)'
+        );
+        $query->setParameter('emails', $emails, ArrayParameterType::STRING);
 
-        $contacts = $qb->getQuery()->getResult();
+        /** @var Lead[] $contacts */
+        $contacts = $query->getResult();
 
         foreach ($contacts as $contact) {
-            $contactEmail = strtolower($contact->getEmail());
-            if (isset($result[$contactEmail])) {
-                $result[$contactEmail] = $contact;
+            $email = $contact->getEmail();
+            if (null === $email) {
+                continue;
+            }
+            $key = strtolower($email);
+            if (array_key_exists($key, $result)) {
+                $result[$key] = $contact;
             }
         }
 

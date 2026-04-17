@@ -125,6 +125,19 @@ class SuppressionRepository extends ServiceEntityRepository
         ];
     }
 
+    /**
+     * @return Suppression[]
+     */
+    public function findUnmatched(int $limit = 500): array
+    {
+        return $this->createQueryBuilder('s')
+            ->where('s.actionTaken = :unmatched')
+            ->setParameter('unmatched', Suppression::ACTION_UNMATCHED)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function existsBySourceKey(string $email, string $type, \DateTimeInterface $sourceCreatedAt): bool
     {
         $count = (int) $this->createQueryBuilder('s')
