@@ -165,3 +165,113 @@
     .sd-chart-filters { flex-direction: column; }
     .panel-heading .pull-right { float: none !important; margin-top: 10px; }
 }
+
+/* Sync Overlay */
+#sd-sync-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(3px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: sd-fade-in 0.2s ease-out;
+}
+
+.sd-sync-modal {
+    background: #fff;
+    padding: 40px 50px;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    text-align: center;
+    max-width: 480px;
+    animation: sd-slide-up 0.3s ease-out;
+}
+
+.sd-sync-title {
+    margin: 20px 0 10px;
+    color: #2c3e50;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.sd-sync-msg {
+    color: #6c757d;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+.sd-sync-elapsed {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #475569;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.sd-sync-elapsed i { color: #3498db; margin-right: 4px; }
+
+/* Big animated spinner (4 dots rotating) */
+.sd-spinner {
+    display: inline-block;
+    position: relative;
+    width: 64px;
+    height: 64px;
+}
+
+.sd-spinner div {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background: #3498db;
+    border-radius: 50%;
+    animation: sd-spinner-bounce 1.2s linear infinite;
+}
+
+.sd-spinner div:nth-child(1) { top:  6px; left:  6px; animation-delay: 0s;    }
+.sd-spinner div:nth-child(2) { top:  6px; left: 44px; animation-delay: -0.4s; }
+.sd-spinner div:nth-child(3) { top: 44px; left: 44px; animation-delay: -0.8s; }
+.sd-spinner div:nth-child(4) { top: 44px; left:  6px; animation-delay: -1.2s; }
+
+@keyframes sd-spinner-bounce {
+    0%, 100% { transform: scale(1);   opacity: 1;   }
+    50%      { transform: scale(0.4); opacity: 0.4; }
+}
+
+/* Inline spinning icon for the button itself */
+.sd-icon-spin {
+    display: inline-block;
+    animation: sd-rotate 1s linear infinite;
+}
+
+@keyframes sd-rotate {
+    from { transform: rotate(0deg);   }
+    to   { transform: rotate(360deg); }
+}
+
+@keyframes sd-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes sd-slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Make the Run Sync button visually pulse when ready */
+#sd-sync-btn:not(:disabled):hover {
+    background: #3498db;
+    color: #fff;
+    border-color: #2980b9;
+}
+
+#sd-sync-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}

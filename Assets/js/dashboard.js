@@ -201,12 +201,46 @@ var SyncData = (function () {
         }
     }
 
+    function showSyncOverlay() {
+        if (document.getElementById('sd-sync-overlay')) return;
+
+        var elapsedStart = Date.now();
+        var overlay = document.createElement('div');
+        overlay.id = 'sd-sync-overlay';
+        overlay.innerHTML =
+            '<div class="sd-sync-modal">' +
+                '<div class="sd-spinner"><div></div><div></div><div></div><div></div></div>' +
+                '<h3 class="sd-sync-title">Sync in progress</h3>' +
+                '<p class="sd-sync-msg">Fetching suppressions from SendGrid and applying them to Mautic.<br>This can take several minutes for large lists — please don\'t close this page.</p>' +
+                '<div class="sd-sync-elapsed"><i class="ri-time-line"></i> <span id="sd-sync-time">0s</span> elapsed</div>' +
+            '</div>';
+        document.body.appendChild(overlay);
+
+        // Live elapsed timer
+        overlay.dataset.timer = setInterval(function () {
+            var sec = Math.floor((Date.now() - elapsedStart) / 1000);
+            var label = sec < 60
+                ? sec + 's'
+                : Math.floor(sec / 60) + 'm ' + (sec % 60) + 's';
+            var el = document.getElementById('sd-sync-time');
+            if (el) el.textContent = label;
+        }, 1000);
+    }
+
+    function hideSyncOverlay() {
+        var overlay = document.getElementById('sd-sync-overlay');
+        if (!overlay) return;
+        if (overlay.dataset.timer) clearInterval(overlay.dataset.timer);
+        overlay.remove();
+    }
+
     function runSync() {
         var btn = document.getElementById('sd-sync-btn');
         if (!btn) return;
 
         btn.disabled = true;
-        btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Syncing...';
+        btn.innerHTML = '<i class="ri-loader-4-line sd-icon-spin"></i> Syncing...';
+        showSyncOverlay();
 
         fetch(mauticBaseUrl + 's/plugins/syncdata/sync/run', {
             method: 'POST',
@@ -217,20 +251,28 @@ var SyncData = (function () {
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
+            hideSyncOverlay();
             btn.disabled = false;
             btn.innerHTML = '<i class="ri-refresh-line"></i> Run Sync Now';
 
             if (data.success) {
-                Mautic.addSuccessFlash(data.message || 'Sync completed successfully.');
-                setTimeout(function () { window.location.reload(); }, 1500);
+                if (typeof Mautic !== 'undefined' && Mautic.addSuccessFlash) {
+                    Mautic.addSuccessFlash(data.message || 'Sync completed successfully.');
+                }
+                setTimeout(function () { window.location.reload(); }, 1200);
             } else {
-                Mautic.addFailureFlash(data.error || 'Sync failed.');
+                if (typeof Mautic !== 'undefined' && Mautic.addFailureFlash) {
+                    Mautic.addFailureFlash(data.error || 'Sync failed.');
+                } else {
+                    alert('Sync failed: ' + (data.error || 'Unknown error'));
+                }
             }
         })
-        .catch(function () {
+        .catch(function (err) {
+            hideSyncOverlay();
             btn.disabled = false;
             btn.innerHTML = '<i class="ri-refresh-line"></i> Run Sync Now';
-            Mautic.addFailureFlash('Sync request failed.');
+            alert('Sync request failed: ' + (err && err.message ? err.message : 'network error'));
         });
     }
 
