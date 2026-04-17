@@ -3,7 +3,7 @@
 {% block headerTitle %}{{ 'mautic.syncdata.settings.title'|trans }}{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ asset('plugins/MauticSyncDataBundle/Assets/css/syncdata.css') }}">
+<link rel="stylesheet" href="{{ asset('plugins/MauticSyncDataBundle/Assets/css/syncdata.css') }}?v={{ "now"|date("YmdHi") }}">
 
 <div class="sd-settings">
     <form id="sd-settings-form" method="POST" action="{{ path('mautic_syncdata_settings_save') }}">
