@@ -305,3 +305,66 @@
     flex: 1;
     min-width: 0;
 }
+
+/* API Connection panel status colors */
+.sd-api-panel {
+    border-left: 4px solid #ccc;
+    transition: background 0.3s, border-color 0.3s;
+}
+
+.sd-api-panel .panel-heading {
+    background: transparent;
+    border-bottom-color: rgba(0,0,0,0.06);
+}
+
+.sd-api-panel.sd-api-saved {
+    background: #f1f8f4;
+    border-left-color: #2e7d32;
+}
+.sd-api-panel.sd-api-saved .panel-body { background: #f8fcf9; }
+
+.sd-api-panel.sd-api-verified {
+    background: #e8f5e9;
+    border-left-color: #1b5e20;
+}
+.sd-api-panel.sd-api-verified .panel-body { background: #f0faf1; }
+
+.sd-api-panel.sd-api-missing {
+    background: #fff8e1;
+    border-left-color: #f57c00;
+}
+.sd-api-panel.sd-api-missing .panel-body { background: #fffbf0; }
+
+.sd-api-panel.sd-api-invalid {
+    background: #ffebee;
+    border-left-color: #c62828;
+}
+.sd-api-panel.sd-api-invalid .panel-body { background: #fff5f6; }
+
+/* Status badge in panel header */
+.sd-api-badge {
+    display: inline-block;
+    margin-left: 12px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+}
+.sd-api-badge i { margin-right: 4px; }
+
+.sd-api-badge-saved    { background: #c8e6c9; color: #1b5e20; }
+.sd-api-badge-verified { background: #a5d6a7; color: #0d3a10; }
+.sd-api-badge-missing  { background: #ffe0b2; color: #e65100; }
+.sd-api-badge-invalid  { background: #ffcdd2; color: #b71c1c; }
+
+/* Missing-state preview block */
+.sd-key-preview-missing {
+    background: #fff3e0;
+    border-color: #ffcc80;
+    color: #bf360c;
+}
+.sd-key-preview-missing i { color: #e65100; }
+.sd-key-preview-missing .sd-key-status { color: #bf360c; }

@@ -10,13 +10,24 @@
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('syncdata_settings') }}">
 
         {# API Connection #}
-        <div class="panel panel-default">
+        <div class="panel panel-default sd-api-panel {{ hasApiKey ? 'sd-api-saved' : 'sd-api-missing' }}" id="sd-api-panel">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="ri-key-line"></i> API Connection</h3>
+                <h3 class="panel-title">
+                    <i class="ri-key-line"></i> API Connection
+                    {% if hasApiKey %}
+                        <span class="sd-api-badge sd-api-badge-saved">
+                            <i class="ri-checkbox-circle-fill"></i> Key Saved
+                        </span>
+                    {% else %}
+                        <span class="sd-api-badge sd-api-badge-missing">
+                            <i class="ri-error-warning-fill"></i> No Key Configured
+                        </span>
+                    {% endif %}
+                </h3>
             </div>
             <div class="panel-body">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                         <div class="form-group">
                             <label class="control-label" for="sd-api-key">{{ 'mautic.syncdata.settings.api_key'|trans }}</label>
                             {% if hasApiKey %}
@@ -24,6 +35,11 @@
                                     <i class="ri-checkbox-circle-fill text-success"></i>
                                     <span class="sd-key-status">{{ 'mautic.syncdata.settings.api_key.saved'|trans }}</span>
                                     <code class="sd-key-mask">{{ apiKeyPreview }}</code>
+                                </div>
+                            {% else %}
+                                <div class="sd-key-preview sd-key-preview-missing">
+                                    <i class="ri-error-warning-fill"></i>
+                                    <span class="sd-key-status">No API key on file. The plugin can't sync until you add one.</span>
                                 </div>
                             {% endif %}
                             <div class="input-group">
@@ -182,6 +198,7 @@ function testConnection() {
     .then(function (data) {
         btn.disabled = false;
         btn.innerHTML = '<i class="ri-link"></i> Test Connection';
+        setApiPanelStatus(data.success ? 'verified' : 'invalid');
         if (data.success) {
             resultDiv.innerHTML = '<div class="alert alert-success"><i class="ri-check-line"></i> Connected successfully (' + (data.account || '') + ')</div>';
         } else {
@@ -191,8 +208,29 @@ function testConnection() {
     .catch(function () {
         btn.disabled = false;
         btn.innerHTML = '<i class="ri-link"></i> Test Connection';
+        setApiPanelStatus('invalid');
         resultDiv.innerHTML = '<div class="alert alert-danger">Request failed</div>';
     });
+}
+
+function setApiPanelStatus(status) {
+    var panel = document.getElementById('sd-api-panel');
+    if (!panel) return;
+    panel.classList.remove('sd-api-saved', 'sd-api-missing', 'sd-api-verified', 'sd-api-invalid');
+    panel.classList.add('sd-api-' + status);
+
+    var badge = panel.querySelector('.sd-api-badge');
+    if (badge) {
+        badge.classList.remove('sd-api-badge-saved', 'sd-api-badge-missing', 'sd-api-badge-verified', 'sd-api-badge-invalid');
+        badge.classList.add('sd-api-badge-' + status);
+        var labels = {
+            verified: '<i class="ri-shield-check-fill"></i> Key Verified',
+            invalid:  '<i class="ri-error-warning-fill"></i> Key Invalid',
+            saved:    '<i class="ri-checkbox-circle-fill"></i> Key Saved',
+            missing:  '<i class="ri-error-warning-fill"></i> No Key Configured'
+        };
+        badge.innerHTML = labels[status] || labels.saved;
+    }
 }
 
 // Toggle segment selector visibility based on action mode
