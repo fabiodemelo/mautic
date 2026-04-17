@@ -53,9 +53,9 @@ class SyncCommand extends Command
         $apiKeys           = $integrationConfig->getApiKeys();
         $featureSettings   = $integrationConfig->getFeatureSettings() ?? [];
 
-        $apiKey = $apiKeys['api_key'] ?? '';
-        if ('' === $apiKey) {
-            $io->error('SyncData API key is not configured. Go to Settings > Plugins > SyncData.');
+        $apiKey = $apiKeys['api_key'] ?? null;
+        if (!is_string($apiKey) || '' === $apiKey) {
+            $io->error('SyncData API key is not configured or could not be decrypted. Re-save it on the Settings page.');
 
             return Command::FAILURE;
         }

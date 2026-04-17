@@ -30,11 +30,11 @@ class SyncController extends CommonController
             $apiKeys           = $integrationConfig->getApiKeys();
             $featureSettings   = $integrationConfig->getFeatureSettings() ?? [];
 
-            $apiKey = $apiKeys['api_key'] ?? '';
-            if ('' === $apiKey) {
+            $apiKey = $apiKeys['api_key'] ?? null;
+            if (!is_string($apiKey) || '' === $apiKey) {
                 return new JsonResponse([
                     'success' => false,
-                    'error'   => 'SyncData API key is not configured.',
+                    'error'   => 'SyncData API key is not configured or could not be decrypted. Re-save it on the Settings page.',
                 ]);
             }
 

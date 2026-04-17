@@ -6,6 +6,7 @@ namespace MauticPlugin\MauticSyncDataBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Mautic\CoreBundle\Controller\CommonController;
+use Mautic\IntegrationsBundle\Facade\EncryptionService;
 use Mautic\IntegrationsBundle\Helper\IntegrationsHelper;
 use Mautic\LeadBundle\Model\ListModel;
 use MauticPlugin\MauticSyncDataBundle\Entity\Suppression;
@@ -62,6 +63,7 @@ class SettingsController extends CommonController
     public function saveAction(
         Request $request,
         IntegrationsHelper $integrationsHelper,
+        EncryptionService $encryptionService,
         EntityManagerInterface $entityManager,
     ): Response {
         if (!$this->security->isGranted('plugin:syncdata:settings:edit')) {
@@ -74,7 +76,9 @@ class SettingsController extends CommonController
 
             $apiKey = $request->request->get('api_key');
             if (null !== $apiKey && '' !== $apiKey) {
-                $integrationConfig->setApiKeys(['api_key' => $apiKey]);
+                // Encrypt before storing — IntegrationsHelper auto-decrypts on read
+                $encryptedKeys = $encryptionService->encrypt(['api_key' => $apiKey]);
+                $integrationConfig->setApiKeys($encryptedKeys);
             }
 
             $featureSettings = [
@@ -118,8 +122,8 @@ class SettingsController extends CommonController
             $apiKey  = $apiKeys['api_key'] ?? '';
         }
 
-        if ('' === $apiKey) {
-            return new JsonResponse(['success' => false, 'error' => 'No API key provided']);
+        if (!is_string($apiKey) || '' === $apiKey) {
+            return new JsonResponse(['success' => false, 'error' => 'No API key provided. Re-save the form first.']);
         }
 
         $apiClient->setApiKey($apiKey);
