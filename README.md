@@ -405,6 +405,15 @@ Set **Max Records Per Sync** to e.g. `5000`, run a full sync, then run increment
 
 ## Changelog
 
+### v2.2.0 — Mautic 7 compatibility
+- **Mautic 7.0+ support.** Plugin migrations rewritten to extend
+  `Mautic\IntegrationsBundle\Migration\AbstractMigration` instead of
+  Doctrine's `AbstractMigration` (Mautic 7 changed the constructor
+  signature, breaking the old base class).
+- Bumped minimum PHP requirement to **8.2** to match Mautic 7
+- Existing tables are preserved — `isApplicable()` returns false when
+  the table already exists, so upgraders aren't disrupted
+
 ### v2.1.0
 - Trend chart now plots by **provider creation date** (`source_created_at`) instead of import date, so a one-time backfill no longer collapses to a single spike
 - Trend chart fills missing days with zero so the line is continuous

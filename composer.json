@@ -2,7 +2,7 @@
     "name": "mauticplugin/syncdata-bundle",
     "description": "Sync suppressions (bounces, spam reports, blocks, invalid emails, unsubscribes) to Mautic DNC or segments.",
     "type": "mautic-plugin",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "keywords": ["mautic", "syncdata", "suppression", "dnc", "bounce", "email"],
     "license": "GPL-3.0-or-later",
     "authors": [
@@ -18,7 +18,7 @@
         "source": "https://github.com/fabiodemelo/mautic"
     },
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "mautic/core-lib": ">=5.0"
     },
     "autoload": {
