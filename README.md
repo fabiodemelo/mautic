@@ -405,6 +405,13 @@ Set **Max Records Per Sync** to e.g. `5000`, run a full sync, then run increment
 
 ## Changelog
 
+### v2.1.0
+- Trend chart now plots by **provider creation date** (`source_created_at`) instead of import date, so a one-time backfill no longer collapses to a single spike
+- Trend chart fills missing days with zero so the line is continuous
+- Refreshed donut palette to a maximally distinct rainbow (red / orange / yellow / green / blue / purple) — adjacent slices never blur together
+- "Run Sync Now" button is now wide, green, and prominent with hover lift and disabled state
+- Documentation refresh
+
 ### v2.0.0
 - Mautic 5.x compatible (Symfony 6, PHP 8.1+)
 - Encrypted API key storage via IntegrationsBundle EncryptionService

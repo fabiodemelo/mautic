@@ -43,13 +43,14 @@ class StatsCalculator
     {
         $breakdown = $this->getSuppressionRepository()->getBreakdownByType();
 
+        // Maximally distinct rainbow palette so adjacent slices never blur together
         $colors = [
-            Suppression::TYPE_BOUNCE             => '#e74c3c',
-            Suppression::TYPE_SPAM_REPORT        => '#e67e22',
-            Suppression::TYPE_BLOCK              => '#f1c40f',
-            Suppression::TYPE_INVALID_EMAIL      => '#9b59b6',
-            Suppression::TYPE_GLOBAL_UNSUBSCRIBE => '#3498db',
-            Suppression::TYPE_GROUP_UNSUBSCRIBE  => '#1abc9c',
+            Suppression::TYPE_BOUNCE             => '#e74c3c', // red
+            Suppression::TYPE_SPAM_REPORT        => '#f39c12', // orange
+            Suppression::TYPE_BLOCK              => '#f1c40f', // yellow
+            Suppression::TYPE_INVALID_EMAIL      => '#27ae60', // green
+            Suppression::TYPE_GLOBAL_UNSUBSCRIBE => '#3498db', // blue
+            Suppression::TYPE_GROUP_UNSUBSCRIBE  => '#9b59b6', // purple
         ];
 
         $labels    = [];

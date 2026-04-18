@@ -87,13 +87,20 @@ class SuppressionRepository extends ServiceEntityRepository
 
     public function getTrendData(string $period = '30d', ?string $type = null): array
     {
-        $since = new \DateTime();
-        $since->modify('-'.intval($period).' days');
+        $days = (int) $period;
+        if ($days <= 0) {
+            $days = 30;
+        }
 
+        $since = (new \DateTime())->modify("-{$days} days");
+
+        // Group by source_created_at (when the provider recorded the suppression),
+        // not synced_at — otherwise the chart shows one big spike on the day
+        // a backfill ran instead of the real over-time rate.
         $qb = $this->getEntityManager()->getConnection()->createQueryBuilder()
-            ->select("DATE(synced_at) as date_label, COUNT(*) as cnt")
+            ->select('DATE(source_created_at) as date_label, COUNT(*) as cnt')
             ->from('plugin_syncdata_suppressions')
-            ->where('synced_at >= :since')
+            ->where('source_created_at >= :since')
             ->setParameter('since', $since->format('Y-m-d'))
             ->groupBy('date_label')
             ->orderBy('date_label', 'ASC');
@@ -103,7 +110,27 @@ class SuppressionRepository extends ServiceEntityRepository
                 ->setParameter('type', $type);
         }
 
-        return $qb->executeQuery()->fetchAllAssociative();
+        $rows = $qb->executeQuery()->fetchAllAssociative();
+
+        // Fill missing days with 0 so the line is continuous instead of a single dot
+        $byDate = [];
+        foreach ($rows as $row) {
+            $byDate[$row['date_label']] = (int) $row['cnt'];
+        }
+
+        $result = [];
+        $cursor = clone $since;
+        $today  = new \DateTime('today');
+        while ($cursor <= $today) {
+            $key = $cursor->format('Y-m-d');
+            $result[] = [
+                'date_label' => $key,
+                'cnt'        => $byDate[$key] ?? 0,
+            ];
+            $cursor->modify('+1 day');
+        }
+
+        return $result;
     }
 
     public function getRecentSuppressions(int $page = 1, int $limit = 25, array $filters = []): array

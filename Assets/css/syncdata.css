@@ -110,12 +110,45 @@
 }
 
 /* Type labels */
-.sd-type-bounce             { background-color: #e74c3c; color: #fff; }
-.sd-type-spam_report        { background-color: #e67e22; color: #fff; }
-.sd-type-block              { background-color: #f1c40f; color: #333; }
-.sd-type-invalid_email      { background-color: #9b59b6; color: #fff; }
-.sd-type-global_unsubscribe { background-color: #3498db; color: #fff; }
-.sd-type-group_unsubscribe  { background-color: #1abc9c; color: #fff; }
+.sd-type-bounce             { background-color: #e74c3c; color: #fff; } /* red    */
+.sd-type-spam_report        { background-color: #f39c12; color: #fff; } /* orange */
+.sd-type-block              { background-color: #f1c40f; color: #333; } /* yellow */
+.sd-type-invalid_email      { background-color: #27ae60; color: #fff; } /* green  */
+.sd-type-global_unsubscribe { background-color: #3498db; color: #fff; } /* blue   */
+.sd-type-group_unsubscribe  { background-color: #9b59b6; color: #fff; } /* purple */
+
+/* Run Sync button — wider, green, prominent */
+#sd-sync-btn {
+    background: linear-gradient(135deg, #27ae60, #219653);
+    border-color: #1e874b;
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 28px;
+    min-width: 200px;
+    box-shadow: 0 2px 6px rgba(39, 174, 96, 0.35);
+    transition: all 0.2s ease;
+}
+
+#sd-sync-btn:not(:disabled):hover,
+#sd-sync-btn:not(:disabled):focus {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    border-color: #1e874b;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.5);
+    transform: translateY(-1px);
+}
+
+#sd-sync-btn:disabled {
+    background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+    border-color: #7f8c8d;
+    color: #fff;
+    opacity: 0.85;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+#sd-sync-btn i { margin-right: 6px; }
 
 /* Tables */
 .sd-reason-cell {
