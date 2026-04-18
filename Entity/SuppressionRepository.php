@@ -43,6 +43,31 @@ class SuppressionRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * Count of suppressions grouped by action_taken (dnc / segment / unmatched).
+     *
+     * @return array<string, int>
+     */
+    public function getCountsByAction(): array
+    {
+        $rows = $this->createQueryBuilder('s')
+            ->select('s.actionTaken, COUNT(s.id) AS cnt')
+            ->groupBy('s.actionTaken')
+            ->getQuery()
+            ->getArrayResult();
+
+        $counts = [
+            Suppression::ACTION_DNC       => 0,
+            Suppression::ACTION_SEGMENT   => 0,
+            Suppression::ACTION_UNMATCHED => 0,
+        ];
+        foreach ($rows as $row) {
+            $counts[$row['actionTaken']] = (int) $row['cnt'];
+        }
+
+        return $counts;
+    }
+
     public function getBreakdownByType(): array
     {
         $results = $this->createQueryBuilder('s')

@@ -22,14 +22,19 @@ class StatsCalculator
         $suppressionRepo = $this->getSuppressionRepository();
         $syncLogRepo     = $this->getSyncLogRepository();
 
-        $now = new \DateTime();
+        $now             = new \DateTime();
+        $countsByAction  = $suppressionRepo->getCountsByAction();
+        $countsByType    = $suppressionRepo->getBreakdownByType();
 
         return [
+            'fetched_total'      => $syncLogRepo->getTotalFetched(),
             'total_synced'       => $suppressionRepo->getTotalCount(),
             'new_24h'            => $suppressionRepo->getCountSince((clone $now)->modify('-24 hours')),
             'new_7d'             => $suppressionRepo->getCountSince((clone $now)->modify('-7 days')),
             'new_30d'            => $suppressionRepo->getCountSince((clone $now)->modify('-30 days')),
             'contacts_protected' => $suppressionRepo->getProtectedContactsCount(),
+            'by_action'          => $countsByAction,
+            'by_type'            => $countsByType,
             'last_sync'          => $this->getLastSyncInfo($syncLogRepo),
         ];
     }

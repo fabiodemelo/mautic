@@ -25,6 +25,19 @@ class SyncLogRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    /**
+     * Total records fetched from the source across all completed syncs.
+     */
+    public function getTotalFetched(): int
+    {
+        return (int) $this->createQueryBuilder('sl')
+            ->select('COALESCE(SUM(sl.recordsFetched), 0)')
+            ->where('sl.status IN (:statuses)')
+            ->setParameter('statuses', [SyncLog::STATUS_SUCCESS, SyncLog::STATUS_PARTIAL])
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function getLastSyncTimestamp(): int
     {
         $lastSync = $this->getLastSuccessfulSync();

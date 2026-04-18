@@ -368,3 +368,55 @@
 }
 .sd-key-preview-missing i { color: #e65100; }
 .sd-key-preview-missing .sd-key-status { color: #bf360c; }
+
+/* 5-column summary cards grid */
+.sd-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 1400px) {
+    .sd-cards-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+    .sd-cards-grid { grid-template-columns: 1fr; }
+}
+
+/* Make cards in the grid fit nicely without col-md wrapper */
+.sd-cards-grid .sd-card { margin: 0; min-height: 100px; }
+
+/* New card color: purple for the SendGrid-source data */
+.sd-card-purple { border-left: 4px solid #8e44ad; }
+.sd-card-purple .sd-card-icon { color: #8e44ad; }
+
+/* Sub-tags below the main number (DNC / Segment / Unmatched breakdown) */
+.sd-card-sub {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.sd-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    line-height: 1.4;
+}
+
+.sd-tag-danger { background: #fdecea; color: #c0392b; }
+.sd-tag-info   { background: #e8f4fb; color: #2980b9; }
+.sd-tag-muted  { background: #ecf0f1; color: #7f8c8d; }
+
+.sd-card-help {
+    font-size: 11px;
+    color: #95a5a6;
+    margin-left: 2px;
+    cursor: help;
+}
