@@ -363,6 +363,34 @@ Your API key doesn't have the right scope. Generate a new SendGrid key with **Su
 2. Check **Max Records Per Sync** — if it's set to a small number, the run stops there. Set to `0` for unlimited.
 3. Make sure the suppression types you care about are **enabled** on the Settings page.
 
+### Sync log shows `records_fetched=0` for several days
+First confirm whether SendGrid actually has new suppressions — the plugin only reports what the provider returns. Quick direct API check from the Mautic root:
+
+```bash
+APIKEY="SG.xxxxxxxxxxxxxxxxxxxx"   # the same key you saved in Settings
+SINCE=$(date -d '-30 days' +%s)
+for ep in bounces blocks spam_reports invalid_emails; do
+  printf "%-16s " "$ep"
+  curl -s -o /dev/null -w "http=%{http_code}\n" \
+    -H "Authorization: Bearer $APIKEY" \
+    "https://api.sendgrid.com/v3/suppression/$ep?start_time=$SINCE&limit=500"
+done
+```
+
+- All `http=200` and JSON `[]` → SendGrid genuinely has nothing new. Plugin is correct, no fix needed.
+- Any `http=403` → API key lost the `suppressions.*.read` scope. Regenerate.
+- One endpoint returns rows but the plugin still reports 0 → open an issue with the response body.
+
+Also confirm the **cron** is actually running. `crontab -l | grep syncdata` should show your scheduled entry. If empty, scheduled syncs aren't happening at all — manual runs from the dashboard still work.
+
+### DNC reason mapping reference (v2.3.1+)
+| Suppression type | `lead_donotcontact.reason` |
+|---|---|
+| bounce / block / spam_report / invalid_email | **2** (BOUNCED) |
+| global_unsubscribe / group_unsubscribe | **1** (UNSUBSCRIBED) |
+
+If a contact already has an UNSUBSCRIBED row for the email channel, Mautic refuses to overwrite it with BOUNCED. The plugin marks those `action_taken='dnc_exists'` (counts toward `records_skipped` in the sync log) — this is expected, not a bug.
+
 ### Dashboard or Settings shows "Uh oh! I think I broke it…"
 Check the Mautic log for the real error:
 ```bash
