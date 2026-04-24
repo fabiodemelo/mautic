@@ -68,13 +68,16 @@ class SyncEngine
 
             $maxPerSync = (int) ($settings['max_per_sync'] ?? 0);
 
-            $totalFetched   = 0;
-            $totalAdded     = 0;
-            $totalSkipped   = 0;
-            $totalUnmatched = 0;
-            $totalProcessed = 0;
-            $breakdown      = [];
-            $reachedCap     = false;
+            $totalFetched    = 0;
+            $totalAdded      = 0;
+            $totalSkipped    = 0;
+            $totalUnmatched  = 0;
+            $totalDncExists  = 0;
+            $totalDncFailed  = 0;
+            $totalProcessed  = 0;
+            $breakdown       = [];
+            $dncErrors       = [];
+            $reachedCap      = false;
 
             foreach ($allSuppressions as $type => $suppressions) {
                 $count = count($suppressions);
@@ -127,19 +130,43 @@ class SyncEngine
                         if ('segment' === $actionMode && null !== $targetSegment) {
                             $this->addContactToSegment($contact, $targetSegment);
                             $suppression->setActionTaken(Suppression::ACTION_SEGMENT);
+                            ++$totalAdded;
+                            ++$breakdown[$type];
                         } else {
                             $dncReason = $this->dncMapper->getDncReason($type);
                             $comment   = $this->dncMapper->buildComment($type, $record['reason'], $record['status']);
-                            $this->dncModel->addDncForContact(
-                                $contact,
-                                'email',
-                                $dncReason,
-                                $comment,
-                            );
-                            $suppression->setActionTaken(Suppression::ACTION_DNC);
+
+                            try {
+                                $dncResult = $this->dncModel->addDncForContact(
+                                    $contact,
+                                    'email',
+                                    $dncReason,
+                                    $comment,
+                                );
+                            } catch (\Throwable $e) {
+                                $dncResult = null;
+                                $this->logger->error('SyncData DNC write threw', [
+                                    'email'      => $email,
+                                    'contact_id' => $contactId,
+                                    'reason'     => $dncReason,
+                                    'error'      => $e->getMessage(),
+                                ]);
+                                $dncErrors[] = sprintf('%s (#%d): %s', $email, $contactId, $e->getMessage());
+                            }
+
+                            if ($dncResult instanceof DoNotContactEntity) {
+                                $suppression->setActionTaken(Suppression::ACTION_DNC);
+                                ++$totalAdded;
+                                ++$breakdown[$type];
+                            } elseif (false === $dncResult) {
+                                // Mautic refused — usually because contact already has stronger DNC
+                                $suppression->setActionTaken(Suppression::ACTION_DNC_EXISTS);
+                                ++$totalDncExists;
+                            } else {
+                                $suppression->setActionTaken(Suppression::ACTION_DNC_FAILED);
+                                ++$totalDncFailed;
+                            }
                         }
-                        ++$totalAdded;
-                        ++$breakdown[$type];
                     }
 
                     $this->entityManager->persist($suppression);
@@ -156,10 +183,25 @@ class SyncEngine
 
             $syncLog->setRecordsFetched($totalFetched);
             $syncLog->setRecordsAdded($totalAdded);
-            $syncLog->setRecordsSkipped($totalSkipped);
+            $syncLog->setRecordsSkipped($totalSkipped + $totalDncExists);
             $syncLog->setRecordsUnmatched($totalUnmatched);
             $syncLog->setSuppressionBreakdown($breakdown);
-            $syncLog->markCompleted();
+
+            if (!empty($dncErrors)) {
+                // Partial success — some DNC writes failed, surface them in the log
+                $errorPreview = implode("\n", array_slice($dncErrors, 0, 20));
+                if (count($dncErrors) > 20) {
+                    $errorPreview .= sprintf("\n…and %d more", count($dncErrors) - 20);
+                }
+                $syncLog->markPartial(sprintf(
+                    '%d DNC write(s) failed:%s%s',
+                    count($dncErrors),
+                    PHP_EOL,
+                    $errorPreview,
+                ));
+            } else {
+                $syncLog->markCompleted();
+            }
 
             $this->entityManager->persist($syncLog);
             $this->entityManager->flush();
@@ -299,8 +341,31 @@ class SyncEngine
                     $suppression->getSourceReason(),
                     $suppression->getSourceStatus(),
                 );
-                $this->dncModel->addDncForContact($contact, 'email', $dncReason, $comment);
-                $suppression->setActionTaken(Suppression::ACTION_DNC);
+
+                try {
+                    $dncResult = $this->dncModel->addDncForContact(
+                        $contact,
+                        'email',
+                        $dncReason,
+                        $comment,
+                    );
+                } catch (\Throwable $e) {
+                    $this->logger->error('SyncData relink DNC write threw', [
+                        'email'      => $suppression->getEmail(),
+                        'contact_id' => $contact->getId(),
+                        'error'      => $e->getMessage(),
+                    ]);
+                    $suppression->setActionTaken(Suppression::ACTION_DNC_FAILED);
+                    continue;
+                }
+
+                if ($dncResult instanceof DoNotContactEntity) {
+                    $suppression->setActionTaken(Suppression::ACTION_DNC);
+                } elseif (false === $dncResult) {
+                    $suppression->setActionTaken(Suppression::ACTION_DNC_EXISTS);
+                } else {
+                    $suppression->setActionTaken(Suppression::ACTION_DNC_FAILED);
+                }
             }
         }
 

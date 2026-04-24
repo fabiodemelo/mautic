@@ -405,6 +405,20 @@ Set **Max Records Per Sync** to e.g. `5000`, run a full sync, then run increment
 
 ## Changelog
 
+### v2.3.0 — Honest DNC status reporting
+- Captures `addDncForContact` return value instead of assuming success.
+  Previously every contact got `action_taken='dnc'` even when Mautic
+  silently refused to write the DNC row (most often because the
+  contact already had an UNSUBSCRIBED entry which the BOUNCED code
+  path will not override).
+- Two new action states: **`dnc_exists`** (Mautic refused — contact
+  already protected) and **`dnc_failed`** (write threw or returned
+  unexpected). Honest counts now reflect what really happened.
+- Try/catch around the DNC call so a single bad row never aborts a
+  whole sync. Failures land in `monolog` and the SyncLog row gets
+  `markPartial()` with up to 20 sample errors.
+- Re-link pass uses the same return-value handling.
+
 ### v2.2.0 — Mautic 7 compatibility
 - **Mautic 7.0+ support.** Plugin migrations rewritten to extend
   `Mautic\IntegrationsBundle\Migration\AbstractMigration` instead of

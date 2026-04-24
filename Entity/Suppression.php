@@ -32,9 +32,11 @@ class Suppression
         self::TYPE_GROUP_UNSUBSCRIBE,
     ];
 
-    public const ACTION_DNC       = 'dnc';
-    public const ACTION_SEGMENT   = 'segment';
-    public const ACTION_UNMATCHED = 'unmatched';
+    public const ACTION_DNC          = 'dnc';
+    public const ACTION_DNC_EXISTS   = 'dnc_exists';   // contact already on DNC for this channel
+    public const ACTION_DNC_FAILED   = 'dnc_failed';   // addDncForContact threw / errored
+    public const ACTION_SEGMENT      = 'segment';
+    public const ACTION_UNMATCHED    = 'unmatched';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
