@@ -405,6 +405,15 @@ Set **Max Records Per Sync** to e.g. `5000`, run a full sync, then run increment
 
 ## Changelog
 
+### v2.3.1 — Map all deliverability events to BOUNCED
+- DncMapper updated: spam_report and block now map to
+  `DoNotContact::BOUNCED` (was UNSUBSCRIBED and MANUAL respectively).
+  All deliverability problems now share the same DNC reason so
+  SendGrid's bounce/block/spam/invalid signals don't pollute the
+  user-driven UNSUBSCRIBED list.
+- Final mapping: bounce / block / spam_report / invalid_email →
+  BOUNCED (2); global_unsubscribe / group_unsubscribe → UNSUBSCRIBED (1).
+
 ### v2.3.0 — Honest DNC status reporting
 - Captures `addDncForContact` return value instead of assuming success.
   Previously every contact got `action_taken='dnc'` even when Mautic
