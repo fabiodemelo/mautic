@@ -433,6 +433,15 @@ Set **Max Records Per Sync** to e.g. `5000`, run a full sync, then run increment
 
 ## Changelog
 
+### v2.3.2 — Dashboard "Fetched" card shows last run, not cumulative
+- The first card now shows records fetched from the **most recent
+  successful sync** instead of the cumulative SUM across every run.
+  The cumulative number was misleading — re-fetched dedup'd records
+  were being counted multiple times, so the card could show 25k
+  while only 12k were actually stored.
+- Cumulative total still surfaced in the card's tooltip for
+  reference.
+
 ### v2.3.1 — Map all deliverability events to BOUNCED
 - DncMapper updated: spam_report and block now map to
   `DoNotContact::BOUNCED` (was UNSUBSCRIBED and MANUAL respectively).

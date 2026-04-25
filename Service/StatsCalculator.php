@@ -26,8 +26,14 @@ class StatsCalculator
         $countsByAction  = $suppressionRepo->getCountsByAction();
         $countsByType    = $suppressionRepo->getBreakdownByType();
 
+        $lastSync = $syncLogRepo->getLastSuccessfulSync();
+
         return [
+            // Cumulative API rows pulled from the provider across every successful run.
+            // Note: re-fetched dedup'd records are counted multiple times, so this number
+            // can exceed the actual stored count. Use total_synced for the truth.
             'fetched_total'      => $syncLogRepo->getTotalFetched(),
+            'fetched_last'       => null !== $lastSync ? $lastSync->getRecordsFetched() : 0,
             'total_synced'       => $suppressionRepo->getTotalCount(),
             'new_24h'            => $suppressionRepo->getCountSince((clone $now)->modify('-24 hours')),
             'new_7d'             => $suppressionRepo->getCountSince((clone $now)->modify('-7 days')),

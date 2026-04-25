@@ -17,12 +17,12 @@
     {# Summary Cards (5-column CSS grid) #}
     <div class="sd-cards-grid">
 
-        {# 1. Fetched from SendGrid #}
-        <div class="sd-card sd-card-purple" title="Total records pulled from SendGrid across every sync run (includes records that were too large to process under your Max Records Per Sync setting).">
+        {# 1. Fetched from SendGrid (last run) #}
+        <div class="sd-card sd-card-purple" title="Records returned by the SendGrid suppression API on the most recent successful sync. Cumulative across all runs: {{ stats.fetched_total|default(0)|number_format }}.">
             <div class="sd-card-icon"><i class="ri-cloud-line"></i></div>
             <div class="sd-card-body">
-                <div class="sd-card-value" id="sd-fetched">{{ stats.fetched_total|default(0)|number_format }}</div>
-                <div class="sd-card-label">Fetched from SendGrid</div>
+                <div class="sd-card-value" id="sd-fetched">{{ stats.fetched_last|default(0)|number_format }}</div>
+                <div class="sd-card-label">Last Sync from SendGrid</div>
             </div>
         </div>
 

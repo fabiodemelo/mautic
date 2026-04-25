@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'name'        => 'SyncData',
     'description' => 'Sync SendGrid suppressions (bounces, spam reports, blocks, invalid emails, global & group unsubscribes) to Mautic\'s Do Not Contact list or designated segments. Includes dashboard, charts, CSV export, scheduled and on-demand sync, encrypted API key storage, contact re-linking, spike alerts, and a Max Records Per Sync cap. Support: support@demelos.com',
-    'version'     => '2.3.1',
+    'version'     => '2.3.2',
     'author'      => 'Fabio de Melo',
 
     'routes' => [
