@@ -55,30 +55,6 @@
             </div>
         </div>
 
-        {# 4. Contacts Protected #}
-        <div class="sd-card sd-card-success" title="Unique Mautic contacts that were either added to the Do Not Contact list or moved to a designated segment by this plugin. These contacts will no longer receive emails from Mautic.">
-            <div class="sd-card-icon"><i class="ri-user-shield-line"></i></div>
-            <div class="sd-card-body">
-                <div class="sd-card-value" id="sd-protected">{{ stats.contacts_protected|number_format }}</div>
-                <div class="sd-card-label">Contacts Protected <i class="ri-information-line sd-card-help"></i></div>
-            </div>
-        </div>
-
-        {# 5. Last Sync #}
-        <div class="sd-card sd-card-{% if stats.last_sync.status == 'success' %}success{% elseif stats.last_sync.status == 'failed' %}danger{% else %}default{% endif %}" title="Timestamp of the most recent successful sync run.">
-            <div class="sd-card-icon"><i class="ri-time-line"></i></div>
-            <div class="sd-card-body">
-                <div class="sd-card-value sd-card-value-date" id="sd-lastsync">
-                    {% if stats.last_sync.time %}
-                        {{ stats.last_sync.time }}
-                    {% else %}
-                        {{ 'mautic.syncdata.dashboard.never'|trans }}
-                    {% endif %}
-                </div>
-                <div class="sd-card-label">{{ 'mautic.syncdata.dashboard.last_sync'|trans }}</div>
-            </div>
-        </div>
-
     </div>
 
     {# Charts Row #}

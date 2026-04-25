@@ -2,7 +2,7 @@
     "name": "mauticplugin/syncdata-bundle",
     "description": "Sync suppressions (bounces, spam reports, blocks, invalid emails, unsubscribes) to Mautic DNC or segments.",
     "type": "mautic-plugin",
-    "version": "2.3.2",
+    "version": "2.3.3",
     "keywords": ["mautic", "syncdata", "suppression", "dnc", "bounce", "email"],
     "license": "GPL-3.0-or-later",
     "authors": [
